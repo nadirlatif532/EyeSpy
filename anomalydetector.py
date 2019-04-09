@@ -12,6 +12,12 @@ import cv2
 import os, sys
 import Main
 from kivy.uix.image import AsyncImage
+params = {"ytick.color" : "DAA520",
+          "xtick.color" : "DAA520",
+          "axes.labelcolor" : "DAA520",
+          "axes.edgecolor" : "DAA520"}
+plt.rcParams.update(params)
+
 
 def load_model(json_path):
     model = model_from_json(open(json_path).read())
@@ -228,7 +234,12 @@ def anomalydetector(vidpath,featpath,video_name):
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
     plotpath = os.path.join(plotdir,video_name[:-4])
-    plt.plot(x, scoressmoothed, color='r', linewidth=2)
+    fig = plt.figure()
+    fig.patch.set_color(('#2f323a'))
+    plot = fig.add_subplot(1, 1, 1)
+    plot.set_facecolor(('#545F66'))
+
+    plt.plot(x, scoressmoothed, color='#DAA520', linewidth=2)
     plt.savefig(plotpath)
     plt.close()
 
