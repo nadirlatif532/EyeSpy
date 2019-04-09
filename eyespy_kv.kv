@@ -1,0 +1,539 @@
+#:import utils kivy.utils
+
+
+
+<LoginScreen>:
+    FloatLayout:
+        resizable: 0
+        size: 400,600
+        canvas:
+            Color:
+                rgba: rgba('#2f323a')
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Button:
+            size_hint: (0.1,0.1)
+            pos_hint: {'x': 0.85, 'y': 0.875}
+            opacity: 0
+            on_press: quit()
+        Button:
+            id: loginbtn
+            size_hint: (0.7,0.075)
+            pos_hint: {'x': 0.4, 'y': 0.2}
+            background_color: rgba('#2f323a')
+            halign: 'center'
+            text: "LOGIN"
+            background_normal: ''
+            background_down: ''
+            color: rgba('#DAA520')
+            font_size: 20
+            size_hint: (0.2,0.1)
+
+            on_release: root.changeColor()
+            on_press: root.Login()
+
+        Image:
+            source: 'Media/cross.png'
+            size_hint: (0.05,0.05)
+            pos_hint: {'x': 0.9, 'y': 0.92}
+        Image:
+            source: 'Media/eyespy_logo.png'
+            size_hint: (0.4,0.4)
+            pos_hint: {'x': 0.3, 'y': 0.55}
+
+        Label:
+            id:login_error
+            font_name: 'Helvetica_Bold'
+            font_size: 12
+            color: rgba("#cc0000")
+            bold: True
+            size: self.texture_size
+            size_hint: (0.5,0.06)
+            pos_hint: {'x' : 0.25, "y": 0.55}
+            text: 'Invalid Username / Password'
+            opacity:0
+
+        Label:
+            font_name: 'Helvetica_Bold'
+            font_size: 12
+            color: rgba("#DAA520")
+            bold: True
+            size: self.texture_size
+            size_hint: (0.5,0.06)
+            pos_hint: {'x' : 0, "y": 0.5}
+            text: 'USERNAME'
+
+
+
+        TextInput:
+            id: username
+            size_hint: (0.7,0.05)
+            pos_hint: {'x' : 0.15, "y": 0.45}
+            cursor_color: (0,0,0,1)
+            multiline: False
+            foreground_color: rgba('#c8c8c8')
+            cursor_color: rgba('#DAA520')
+            background_color: rgba('#545F66')
+            write_tab: False
+
+        Label:
+            font_name: 'Helvetica_Bold'
+            font_size: 12
+            color: rgba("#DAA520")
+            bold: True
+            size: self.texture_size
+            size_hint: (0.5,0.06)
+            pos_hint: {'x' : 0, "y": 0.38}
+            text: 'PASSWORD'
+
+        TextInput:
+            id: password
+            size_hint: (0.7,0.05)
+            pos_hint: {'x' : 0.15, "y": 0.33}
+            multiline: False
+            cursor_color: (0,0,0,1)
+            password: True
+            foreground_color: rgba('#c8c8c8')
+            cursor_color: rgba('#DAA520')
+            background_color: rgba('#545F66')
+            write_tab: False
+
+<MainMenu>
+
+    FloatLayout:
+
+        canvas:
+            Color:
+                rgba: rgba('#2f323a')
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+
+        Button:
+            id:offline
+            text: 'OFFLINE'
+            size_hint: (0.09,0.058)
+            pos_hint: {'x': 0.05,'left': 0.9, 'top': 1}
+            background_color: rgba('#DAA520')
+            halign: 'center'
+            valing: 'center'
+            font_size: 16
+            background_down: ''
+            color: rgba('#2f323a')
+            background_normal: ''
+
+        Button:
+            id:live
+            text: 'LIVE'
+            size_hint: (0.1,0.053)
+            pos_hint: {'x': 0.15,'left': 0.9, 'top': 1}
+            background_color: rgba('#2f323a')
+            halign: 'left'
+            valing: 'center'
+            font_size: 16
+            background_down: ''
+            color: rgba('#DAA520')
+            background_normal: ''
+            on_press: root.change_to_live()
+            disabled: True
+            opacity: 0
+        Button:
+
+            id: settings
+
+            size_hint: (0.06,0.06)
+            pos_hint: {'x': 0.94,'y': 0.94}
+
+            halign: 'center'
+            valing: 'center'
+            font_size: 16
+            background_down: ''
+            color: rgba('#2f323a')
+            background_normal: ''
+            opacity: 0
+            on_press:root.image_press(*args)
+
+        Image:
+            id:settingsoffline
+            source: 'Media/settings.png'
+            size_hint: (0.055,0.055)
+            pos_hint:  {'x': 0.94,'y': 0.945}
+
+
+        Image:
+            id:menubar
+            source: 'Media/main_Menu.png'
+            size_hint: (0.125,0.125)
+            pos_hint:  {'x': 0.61,'y': 0.8}
+        Button:
+            id: AddVideo
+            size_hint: (0.03,0.04)
+            pos_hint: {'x': 0.658,'y': 0.88}
+
+            background_down: ''
+
+            background_normal: ''
+            opacity: 0
+            on_press: root.filebrowse()
+
+        Button:
+            id: SaveSnippet
+            size_hint: (0.03,0.04)
+            pos_hint: {'x': 0.658,'y': 0.81}
+            background_down: ''
+            background_normal: ''
+            opacity: 0
+            on_press: root.SaveSnippet()
+
+
+
+        Image:
+            source: 'Media/eyespy_notext.png'
+            size_hint: (0.04,0.04)
+            pos_hint: {'x': 0.006,'y': 0.95}
+        Image:
+            id:mainheaderoffline
+            source: 'Media/Line.png'
+            size_hint: (1,1)
+            pos_hint: {'x': 0,'y': 0.44}
+        Image:
+            id:rightvertoffline
+            source: 'Media/Line_vert.png'
+            size_hint: (1,0.935)
+            pos_hint: {'x': 0.2,'y': 0}
+        Image:
+            id:graphheaderoffline
+            source: 'Media/Line.png'
+            size_hint: (0.7,1)
+            pos_hint: {'x': 0,'y': -0.1}
+
+
+
+        FloatLayout:
+            size_hint: (0.5,0.5)
+            pos_hint: {'x': 0.1, 'y': 0.25}
+
+
+            BoxLayout:
+                id:VideoBox
+                pos_hint: {'x': - 0.08, 'y': 0.35}
+                VideoPlayer:
+                    id:videoplayer
+                    source:'C:\\Users\\nadir\\PycharmProjects\\Eyespy\\Appdata\\Abuse001_x264.mp4'
+                    allow_fullscreen: False
+                    image_overlay_play: 'Media/Play_Button.png'
+                    image_play: 'Media/play_small.png'
+                    image_pause: 'Media/pause_small.png'
+                    on_source: root.featureExtraction()
+
+        BoxLayout:
+            id: plot
+            pos_hint: {'x': 0, 'y': 0}
+            size_hint: (0.7,0.4)
+            AsyncImage:
+                id: plot_image
+                source: ''
+                opacity: 0
+
+        BoxLayout:
+            id:Snippets
+            pos_hint: {'x':  0.71, 'y': 0}
+            size_hint: (0.28,0.93)
+
+
+
+
+
+
+
+<Live>
+
+    FloatLayout:
+
+        canvas:
+            Color:
+                rgba: rgba('#2f323a')
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+
+        Button:
+            id:offline
+            text: 'OFFLINE'
+            size_hint: (0.09,0.058)
+            pos_hint: {'x': 0.05,'left': 0.9, 'top': 1}
+            background_color: rgba('#2f323a')
+            halign: 'center'
+            valing: 'center'
+            font_size: 16
+            background_down: ''
+            color: rgba('#DAA520')
+            background_normal: ''
+            on_press: root.change_to_offline()
+
+        Button:
+            id:live
+            text: 'LIVE'
+            size_hint: (0.1,0.053)
+            pos_hint: {'x': 0.15,'left': 0.9, 'top': 1}
+            background_color: rgba('#DAA520')
+            halign: 'left'
+            valing: 'center'
+            font_size: 16
+            background_down: ''
+            color: rgba('#2f323a')
+            background_normal: ''
+
+        Button:
+
+            id: settings
+
+            size_hint: (0.06,0.06)
+            pos_hint: {'x': 0.94,'y': 0.94}
+
+            halign: 'center'
+            valing: 'center'
+            font_size: 16
+            background_down: ''
+            color: rgba('#2f323a')
+            background_normal: ''
+            opacity: 0
+            on_press:root.image_press(*args)
+        Image:
+            id:settingsoffline
+            source: 'Media/settings.png'
+            size_hint: (0.055,0.055)
+            pos_hint:  {'x': 0.94,'y': 0.945}
+
+
+
+
+        Image:
+            source: 'Media/eyespy_notext.png'
+            size_hint: (0.04,0.04)
+            pos_hint: {'x': 0.006,'y': 0.95}
+        Image:
+            id:mainheaderoffline
+            source: 'Media/Line.png'
+            size_hint: (1,1)
+            pos_hint: {'x': 0,'y': 0.44}
+        Image:
+            id:rightvertoffline
+            source: 'Media/Line_vert.png'
+            size_hint: (1,0.935)
+            pos_hint: {'x': 0.2,'y': 0}
+        Image:
+            id:graphheaderoffline
+            source: 'Media/Line.png'
+            size_hint: (0.7,1)
+            pos_hint: {'x': 0,'y': -0.1}
+
+
+        Label:
+            text: 'Live'
+
+<Settings>
+    FloatLayout:
+
+        canvas:
+            Color:
+                rgba: rgba('#2f323a')
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+
+        Button:
+            id:offline
+            text: 'OFFLINE'
+            size_hint: (0.09,0.058)
+            pos_hint: {'x': 0.05,'left': 0.9, 'top': 1}
+            background_color: rgba('#2f323a')
+            color: rgba('#DAA520')
+            halign: 'center'
+            valing: 'center'
+            font_size: 16
+            background_down: ''
+
+            background_normal: ''
+            on_press: root.change_to_offline()
+
+        Button:
+            id:live
+            text: 'LIVE'
+            size_hint: (0.1,0.053)
+            pos_hint: {'x': 0.15,'left': 0.9, 'top': 1}
+            background_color: rgba('#2f323a')
+            halign: 'left'
+            valing: 'center'
+            font_size: 16
+            background_down: ''
+            color: rgba('#DAA520')
+            background_normal: ''
+            on_press: root.change_to_live()
+            disabled: True
+            opacity: 0
+
+
+        Image:
+            source: 'Media/eyespy_notext.png'
+            size_hint: (0.04,0.04)
+            pos_hint: {'x': 0.006,'y': 0.95}
+        Image:
+            id:mainheaderSettings
+            source: 'Media/Line.png'
+            size_hint: (1,1)
+            pos_hint: {'x': 0,'y': 0.44}
+        Image:
+            id:rightvertSettings
+            source: 'Media/Line_vert.png'
+            size_hint: (1,0.5)
+            pos_hint: {'x': 0.275,'y': 0.435}
+        Image:
+            id:BottomSettings
+            source: 'Media/Line.png'
+            size_hint: (0.55,0.5)
+            pos_hint: {'x': 0.225,'y': 0.185}
+        Image:
+            id:leftvertSettings
+            source: 'Media/Line_vert.png'
+            size_hint: (1,0.5)
+            pos_hint: {'x': -0.275,'y': 0.435}
+
+
+        Label:
+            text: 'Settings'
+        FloatLayout:
+            size_hint: (0.5,0.5)
+            pos_hint: {'x': 0.1, 'y': 0.25}
+
+
+        Image:
+            id:settingsSettings
+            source: 'Media/settings_gray.png'
+            size_hint: (0.055,0.055)
+            pos_hint: {'x': 0.94,'y': 0.945}
+        Label:
+            font_name: 'Helvetica_Bold'
+            text: 'Input Video Folder'
+
+            halign: 'center'
+            valign: 'center'
+            font_size: 14
+            color: rgba('#DAA520')
+            pos_hint: {'x': -0.18, 'y': 0.4}
+        Label:
+            id: inputvideopath
+            font_name: 'Helvetica_Bold'
+            size_hint: (0.3,0.035)
+            pos_hint: {'x': 0.37, 'y': 0.885}
+            font_size: 14
+            color : rgba('#c8c8c8')
+            halign: 'left'
+            valign: 'bottom'
+        Label:
+            font_name: 'Helvetica_Bold'
+            text: 'Output Video Folder'
+
+            halign: 'center'
+            valign: 'center'
+            font_size: 14
+            color: rgba('#DAA520')
+            pos_hint: {'x': -0.18, 'y': 0.3}
+        Label:
+            font_name: 'Helvetica_Bold'
+            text: 'Run using GPU (Please uncheck if No GPU)'
+            halign: 'center'
+            valign: 'center'
+            font_size: 14
+            color: rgba('#DAA520')
+            pos_hint: {'x': -0.1, 'y': 0.15}
+
+        CheckBox:
+            id: check
+            size_hint: 0.5,1
+            on_active: root.Set_GPU()
+            pos_hint: {'x': 0.35, 'y': 0.15}
+            active: True
+
+        Label:
+            id: outputvideopath
+            font_name: 'Helvetica_Bold'
+            size_hint: (0.3,0.035)
+            pos_hint: {'x': 0.37, 'y': 0.785}
+            font_size: 14
+            color : rgba('#c8c8c8')
+            halign: 'left'
+            valign: 'bottom'
+
+        Image:
+            id:filebrowser
+            source: 'Media/file_Browser.png'
+            size_hint: (0.04,0.04)
+            pos_hint: {'x': 0.73,'y': 0.875}
+        Button:
+
+            id: settings
+            size_hint: (0.04,0.04)
+            pos_hint: {'x': 0.73,'y': 0.875}
+            background_down: ''
+            background_normal: ''
+            opacity: 0
+            on_press:root.filebrowse_input()
+        Image:
+            id:filebrowser
+            source: 'Media/file_Browser.png'
+            size_hint: (0.04,0.04)
+            pos_hint: {'x': 0.73,'y': 0.775}
+        Button:
+
+            id: settings
+            size_hint: (0.04,0.04)
+            pos_hint: {'x': 0.73,'y': 0.775}
+            background_down: ''
+            background_normal: ''
+            opacity: 0
+            on_press:root.filebrowse_output()
+<FileBrowser>:
+    dirselect: True
+    background_color: rgba('#c8c8c8')
+
+<Snippet>:
+    canvas:
+        Color:
+            rgba: rgba('#2f323a')
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    cols:3
+    size_hint: 1, None
+    height: self.minimum_height
+
+    AsyncImage:
+        id: severity
+        size_hint_y: None
+        size_hint_x:0.4
+    ImageButton:
+        id: thumbnail
+        size_hint: 1,1
+        on_press: root.thumb_to_video(self.source)
+    CheckBox:
+        id: check
+        size_hint: 0.5,1
+        on_active: root.add_snippet(self.group,self.active)
+
+
+<DisplayRoot>:
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+    on_height: print('Root.minimum_height=', self.minimum_height)
+<ScrollScreen>
+    bar_color: rgba('#DAA520')
+    bar_inactive_color: rgba('#DAA520')
+    bar_width: 4
+    do_scroll_x: False

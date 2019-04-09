@@ -1,0 +1,4 @@
+./Appdata/InputVideos
+./Appdata/output
+./Appdata/temp/frames
+./Appdata/temp/snip
