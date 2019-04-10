@@ -26,7 +26,6 @@ import anomalydetector
 def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,RUN_GPU = True, BATCH_SIZE = 10):
 
 	resize_w = 112
-
 	resize_h = 171
 	nb_frames = 16
 	net = C3D(487)

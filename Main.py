@@ -48,10 +48,10 @@ import sqlite3
 
 LabelBase.register(name = 'Helvetica', fn_regular='Helvetica_Regular.ttf', fn_bold='Helvetica_Bold.ttf')
 Builder.load_file('eyespy_kv.kv')
-path = 'C:\\Users\\nadir\\PycharmProjects\\Eyespy\\Appdata\\Abuse001_x264.mp4'
+path = 'C:\\Users\\nadir\\PycharmProjects\\Eyespy\\Appdata\\Eyespy.mp4'
 feature_path = './Appdata/temp/textfeatures/'
 Snippet_List = list()
-popup = Popup(title='Please Wait', content=Label(text='Video is being processed'),
+popup = Popup(title='Please Wait', content=Label(text='Video is being processed', color = rgba('#DAA520'), font_size = 24, underline = True),
                           auto_dismiss=False,size_hint = (0.5,0.5))
 dbName = "Appdata/eyespy.db"
 table_name = "login"
@@ -103,6 +103,9 @@ class MainMenu(Screen):
             Window.borderless = False
             #Window.fullscreen = 'auto'
             Window.position = 'custom'
+        def on_enter(self, *args):
+            self.ids.videoplayer.state = 'play'
+
         def Set_Gpu(self,state):
             self.GPU_Flag = state
             print(self.GPU_Flag)
@@ -127,6 +130,7 @@ class MainMenu(Screen):
 
         def image_press(*args):
             Screen_Manager.current = 'Settings'
+
         def changevideo(self):
             global path
             mainmenu = App.get_running_app().root.get_screen('MainMenu')
@@ -142,7 +146,6 @@ class MainMenu(Screen):
                 return
             if '_noext' not in mainmenu.ids.videoplayer.source:
                 thread = Thread(target=feature_extractor.feature_extractor, args = (feature_path, path, './Appdata/temp/snip/', 6, mainmenu.GPU_Flag))
-
                 thread.daemon = True
                 thread.start()
                 popup.open()
@@ -330,7 +333,6 @@ class FilePopup():
             if path.find('.mp4'):
                 mainmenu = App.get_running_app().root.get_screen('MainMenu')
                 mainmenu.changevideo()
-
                 self.popup.dismiss()
             else:
                 self.popup.dismiss()
