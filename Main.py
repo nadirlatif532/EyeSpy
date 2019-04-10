@@ -129,8 +129,6 @@ class MainMenu(Screen):
             Screen_Manager.current = 'Settings'
         def changevideo(self):
             global path
-            #self.ids.VideoBox.remove_widget(App.get_running_app().root.get_screen("MainMenu").videoplayer)
-
             mainmenu = App.get_running_app().root.get_screen('MainMenu')
             mainmenu.ids.videoplayer.source = ''
             mainmenu.ids.videoplayer.source = path

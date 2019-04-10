@@ -29,10 +29,8 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 
 	resize_h = 171
 	nb_frames = 16
-	#trainloader = Train_Data_Loader( VIDEO_DIR, resize_w=128, resize_h=171, crop_w = 112, crop_h = 112, nb_frames=16)
 	net = C3D(487)
 	print('net', net)
-	## Loading pretrained model from sports and finetune the last layer
 	net.load_state_dict(torch.load('./c3d.pickle'))
 	if RUN_GPU : 
 		net.cuda(0)
@@ -42,20 +40,10 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 	mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
 	mainmenu.ids.videoplayer.state = 'stop'
 
-	# read video list from the txt list
-	'''
-	video_list_file = args.video_list_file
-	video_list = open(video_list_file).readlines()
-	video_list = [item.strip() for item in video_list]
-	print('video_list', video_list)
-	'''
+
 	gpu_id = 0
 
-	'''
-	if not os.path.isdir(OUTPUT_DIR):
-		os.mkdir(OUTPUT_DIR)
-	f = h5py.File(os.path.join(OUTPUT_DIR, OUTPUT_NAME), 'w')
-	'''
+
 	# current location
 	temp_path = TEMP_PATH
 
@@ -73,8 +61,7 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 	print('Extracting video frames ...')
 	# using ffmpeg to extract video frames into a temporary folder
 	# example: ffmpeg -i video_validation_0000051.mp4 -q:v 2 -f image2 output/image%5d.jpg
-	#os.system('ffmpeg -i ' + video_path + ' -q:v 2 -f image2 ' + frame_path + '/image_%5d.jpg')
-	#os.system('ffmpeg -i {} {}/frames/image_%05d.jpg'.format(video_path, frame_path))
+
 	cap = cv2.VideoCapture(video_path)
 	count = 1
 	while (cap.isOpened()):
@@ -101,10 +88,6 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 		n_batch = n_batch + 1
 	print('n_frames: %d; n_feat: %d; n_batch: %d'%(total_frames, n_feat, n_batch))
 
-	#print 'Total frames: %d'%total_frames
-	#print 'Total validated frames: %d'%valid_frames
-	#print 'NB features: %d' %(valid_frames/nb_frames)
-
 
 	features = []
 
@@ -113,10 +96,7 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 		for j in range(BATCH_SIZE):
 			clip = []
 			clip = np.array([resize(io.imread(os.path.join(frame_path, 'image_{:01d}.jpg'.format(k))), output_shape=(resize_w, resize_h), preserve_range=True) for k in range((i*BATCH_SIZE+j) * nb_frames+1, min((i*BATCH_SIZE+j+1) * nb_frames+1, valid_frames+1))])
-			#print('clip_shape', clip.shape)
 			clip = clip[:, 8: 120, 30: 142, :]
-			#print('clip_shape',clip.shape)
-			#print('range', range((i*BATCH_SIZE+j) * nb_frames+1, min((i*BATCH_SIZE+j+1) * nb_frames+1, valid_frames+1)))
 			input_blobs.append(clip)
 		input_blobs = np.array(input_blobs, dtype='float32')
 		print('input_blobs_shape', input_blobs.shape)
@@ -137,10 +117,8 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 								   int((((n_batch - 1) * BATCH_SIZE + j) * nb_frames + 1) + 15)))])
 
 		clip = clip[:, 8: 120, 30: 142, :]
-		#print('range', range(((n_batch-1)*BATCH_SIZE+j) * nb_frames+1, min(((n_batch-1)*BATCH_SIZE+j+1) * nb_frames+1, valid_frames+1)))
 		input_blobs.append(clip)
 	input_blobs = np.array(input_blobs, dtype='float32')
-	#print('input_blobs_shape', input_blobs.shape)
 	input_blobs = torch.from_numpy(np.float32(input_blobs.transpose(0, 4, 1, 2, 3)))
 	input_blobs = Variable(input_blobs).cuda() if RUN_GPU else Variable(input_blobs)
 	_, batch_output = net(input_blobs, EXTRACTED_LAYER)

@@ -56,8 +56,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     #try:
     window_size = np.abs(np.int(window_size))
     order = np.abs(np.int(order))
-    #except ValueError, msg:
-    #    raise ValueError("window_size and order have to be of type int")
+
 
     if window_size % 2 != 1 or window_size < 1:
         raise TypeError("window_size size must be a positive odd number")
@@ -121,7 +120,6 @@ def anomalydetector(vidpath,featpath,video_name):
 
     cap = cv2.VideoCapture(video_path)
 
-    #Total_frames = cap.get(cv2.CV_CAP_PROP_FRAME_COUNT)
     print(cv2)
     Total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     total_segments = np.linspace(1, Total_frames, num=33)
@@ -134,7 +132,6 @@ def anomalydetector(vidpath,featpath,video_name):
 
 
     inputs = load_dataset_One_Video_Features(FeaturePath)
-    #inputs = np.reshape(inputs, (32, 4096))
     predictions = model.predict_on_batch(inputs)
 
     Frames_Score = []
@@ -225,7 +222,6 @@ def anomalydetector(vidpath,featpath,video_name):
         if cv2.waitKey(10) == 27:
             break
         if cap.get(cv2.CAP_PROP_POS_FRAMES)== break_pt:
-            #cap.get(cv2.CAP_PROP_FRAME_COUNT):
             # If the number of captured frames is equal to the total number of frames,
             # we stop
             break
@@ -235,15 +231,14 @@ def anomalydetector(vidpath,featpath,video_name):
         os.makedirs(plotdir)
     plotpath = os.path.join(plotdir,video_name[:-4])
     fig = plt.figure()
-    fig.patch.set_color(('#2f323a'))
+    fig.patch.set_color('#2F323A')
     plot = fig.add_subplot(1, 1, 1)
-    plot.set_facecolor(('#545F66'))
+    plot.set_facecolor('#545F66')
 
-    plt.plot(x, scoressmoothed, color='#DAA520', linewidth=2)
+    plt.plot(x, scoressmoothed, color='#AA0000', linewidth=2)
     plt.savefig(plotpath)
     plt.close()
 
-    #plot_image = AsyncImage(id = 'plot_image', source = plotpath + '.png', allow_stretch = True)
     mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
 
     mainmenu.ids.plot_image.source = plotpath + '.png'
