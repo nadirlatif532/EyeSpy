@@ -25,7 +25,6 @@ import anomalydetector
 
 def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,RUN_GPU = True, BATCH_SIZE = 10):
 
-	print(RUN_GPU)
 	resize_w = 112
 
 	resize_h = 171
@@ -40,7 +39,8 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 		net.eval()
 		print('net', net)
 	feature_dim = 4096 if EXTRACTED_LAYER != 5 else 8192
-
+	mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
+	mainmenu.ids.videoplayer.state = 'stop'
 
 	# read video list from the txt list
 	'''
@@ -226,4 +226,4 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 	SS = mainmenu.SS
 	SS.add_widget(DR)
 	mainmenu.ids.Snippets.add_widget(SS)
-	mainmenu.ids.videoplayer.source = ''
+	mainmenu.ids.videoplayer.state = 'play'

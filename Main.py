@@ -112,6 +112,7 @@ class MainMenu(Screen):
             self.ids.plot_image.opacity = 0
             self.ids.Snippets.remove_widget(self.SS)
             self.SS = ScrollScreen()
+            self.ids.videoplayer.source = ''
             if os.path.exists('./Appdata/temp'):
                 shutil.rmtree("./Appdata/temp/")
 
@@ -131,6 +132,7 @@ class MainMenu(Screen):
             #self.ids.VideoBox.remove_widget(App.get_running_app().root.get_screen("MainMenu").videoplayer)
 
             mainmenu = App.get_running_app().root.get_screen('MainMenu')
+            mainmenu.ids.videoplayer.source = ''
             mainmenu.ids.videoplayer.source = path
             print(path)
             return
@@ -199,7 +201,7 @@ class Snippet(GridLayout):
 
         mainmenu = App.get_running_app().root.get_screen("MainMenu")
         mainmenu.ids.videoplayer.source = vid_path
-
+        mainmenu.ids.videoplayer.state = 'play'
 
     def add_snippet(self,group,value):
         mainmenu = App.get_running_app().root.get_screen("MainMenu")
