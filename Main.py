@@ -48,7 +48,7 @@ import sqlite3
 
 LabelBase.register(name = 'Helvetica', fn_regular='Helvetica_Regular.ttf', fn_bold='Helvetica_Bold.ttf')
 Builder.load_file('eyespy_kv.kv')
-path = 'C:\\Users\\nadir\\PycharmProjects\\Eyespy\\Appdata\\Eyespy.mp4'
+path = '.\\Appdata\\Eyespy.mp4'
 feature_path = './Appdata/temp/textfeatures/'
 Snippet_List = list()
 popup = Popup(title='Please Wait', content=Label(text='Video is being processed', color = rgba('#DAA520'), font_size = 24, underline = True),
