@@ -51,6 +51,8 @@ import cProfile
 import pstats
 from kivy.clock import Clock
 import torch
+from functools import partial
+
 LabelBase.register(name = 'Helvetica', fn_regular='Helvetica_Regular.ttf', fn_bold='Helvetica_Bold.ttf')
 Builder.load_file('eyespy_kv.kv')
 path = '.\\Appdata\\Eyespy.mp4'
@@ -119,7 +121,7 @@ class MainMenu(Screen):
 
         def Set_Gpu(self,state):
             self.GPU_Flag = state
-            print("Executing on GPU: " + self.GPU_Flag)
+            print("Executing on GPU: " + str(self.GPU_Flag))
 
         def filebrowse(self):
             self.SnippetList = []
@@ -177,12 +179,12 @@ class MainMenu(Screen):
             list_path = 'Appdata/temp/snip/'
 
             if not self.SnippetList:
-                self.popup.content = Label(text='Saving Snippets', color=rgba('#DAA520'), font_size=24)
+                self.popup.content = Label(text='Please Add Snippets to save', color=rgba('#DAA520'), font_size=24)
                 self.popup.open()
-                Clock.Schedule_Once(self.dismisspopup(),1)
+                Clock.schedule_once(partial(self.dismisspopup),1)
 
             else:
-                self.popup.start()
+                self.popup.open()
                 with open('Appdata/temp/snip/snippets.txt', 'w') as file:
                     for element in self.SnippetList:
                         file.writelines('file ' + '\'' + element + "\'\n")
@@ -190,11 +192,11 @@ class MainMenu(Screen):
                 os.system("ffmpeg -f concat -i {}snippets.txt -codec copy {}/{}_anomalous.mp4".format(list_path, output_path,
                                                                                                       vidname))
                 self.dismisspopup()
-            self.SnippetList = []
-            self.ids.plot_image.opacity = 0
-            self.ids.Snippets.remove_widget(self.SS)
-            self.SS = ScrollScreen()
-        def dismisspopup(self):
+                self.SnippetList = []
+                self.ids.plot_image.opacity = 0
+                self.ids.Snippets.remove_widget(self.SS)
+                self.SS = ScrollScreen()
+        def dismisspopup(self, *args):
 
             self.popup.dismiss()
 
