@@ -12,6 +12,8 @@ import cv2
 import os, sys
 import Main
 from kivy.uix.image import AsyncImage
+from kivy.uix.label import Label
+from kivy.utils import rgba
 params = {"ytick.color" : "DAA520",
           "xtick.color" : "DAA520",
           "axes.labelcolor" : "DAA520",
@@ -107,8 +109,8 @@ def load_dataset_One_Video_Features(Feature_Path):
 
 
 def anomalydetector(vidpath,featpath,video_name):
-
-
+    mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
+    mainmenu.popup.content = Label(text='Predicting Anomalies..(2/3)', color=rgba('#DAA520'), font_size=24)
     Model_dir = os.path.dirname(os.path.realpath(__file__))
     weights_path = os.path.join(Model_dir, 'weights_L1L2.mat')
     model_path = os.path.join(Model_dir, 'model.json')
@@ -173,7 +175,7 @@ def anomalydetector(vidpath,featpath,video_name):
     AppData = os.path.join(OUTPUT_DIR, 'AppData')
     if not os.path.exists(AppData):
         os.makedirs(AppData)
-
+    mainmenu.popup.content = Label(text='Extracting Snippets..(3/3)', color=rgba('#DAA520'), font_size=24)
     framedir = os.path.join(AppData,os.path.join('temp','frames'))
     print(framedir)
     snipdir = os.path.join(AppData,os.path.join('temp','snip'))
@@ -239,7 +241,6 @@ def anomalydetector(vidpath,featpath,video_name):
     plt.savefig(plotpath)
     plt.close()
 
-    mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
 
     mainmenu.ids.plot_image.source = plotpath + '.png'
     mainmenu.ids.plot_image.opacity = 1

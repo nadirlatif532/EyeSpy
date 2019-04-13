@@ -225,7 +225,6 @@
                     allow_fullscreen: False
                     image_overlay_play: 'Media/Play_Button.png'
                     image_play: 'Media/play_small.png'
-                    image_pause: 'Media/pause_small.png'
                     image_loading: 'Media/loading.gif'
                     on_source: root.featureExtraction()
 
@@ -458,7 +457,7 @@
             size_hint: 0.5,1
             on_active: root.Set_GPU()
             pos_hint: {'x': 0.35, 'y': 0.15}
-            active: True
+            active: False
 
         Label:
             id: outputvideopath

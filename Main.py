@@ -1,3 +1,4 @@
+
 import kivy
 from kivy.app import App
 #Configuration
@@ -9,6 +10,7 @@ Config.set('graphics','left',700)
 Config.set('graphics','top',200)
 
 import feature_extractor
+from kivy.clock import Clock
 from kivy.utils import rgba,get_color_from_hex
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
@@ -45,14 +47,14 @@ from kivy.uix.checkbox import CheckBox
 import cv2
 import shutil
 import sqlite3
-
+import cProfile
+import pstats
+from kivy.clock import Clock
 LabelBase.register(name = 'Helvetica', fn_regular='Helvetica_Regular.ttf', fn_bold='Helvetica_Bold.ttf')
 Builder.load_file('eyespy_kv.kv')
 path = '.\\Appdata\\Eyespy.mp4'
 feature_path = './Appdata/temp/textfeatures/'
 Snippet_List = list()
-popup = Popup(title='Please Wait', content=Label(text='Video is being processed', color = rgba('#DAA520'), font_size = 24, underline = True),
-                          auto_dismiss=False,size_hint = (0.5,0.5))
 dbName = "Appdata/eyespy.db"
 table_name = "login"
 class LoginScreen(Screen):
@@ -96,8 +98,11 @@ class MainMenu(Screen):
             super(MainMenu, self).__init__(**kwargs)
             self.file_popup = FilePopup()
             self.SnippetList = list()
-            self.GPU_Flag = True
+            self.GPU_Flag = False
             self.SS = ScrollScreen()
+            self.popup = Popup(title='Please Wait',
+                          content=Label(text='Video is being processed', color=rgba('#DAA520'), font_size=24),
+                          auto_dismiss=False, size_hint=(0.5, 0.5))
 
         def on_pre_enter(self):
             Window.borderless = False
@@ -148,10 +153,11 @@ class MainMenu(Screen):
                 thread = Thread(target=feature_extractor.feature_extractor, args = (feature_path, path, './Appdata/temp/snip/', 6, mainmenu.GPU_Flag))
                 thread.daemon = True
                 thread.start()
-                popup.open()
+                self.popup.open()
             else:
                 pass
         def SaveSnippet(self):
+            self.popup.content = Label(text='Saving Snippets', color=rgba('#DAA520'), font_size=24)
             try:
                 f = open('./Appdata/config.txt')
                 lines = f.readlines()
@@ -165,22 +171,26 @@ class MainMenu(Screen):
             list_path = 'Appdata/temp/snip/'
 
             if not self.SnippetList:
-                print("Add Snippets first")
-            else:
+                self.popup.content = Label(text='Saving Snippets', color=rgba('#DAA520'), font_size=24)
+                self.popup.open()
+                Clock.Schedule_Once(self.dismisspopup(),1)
 
+            else:
+                self.popup.start()
                 with open('Appdata/temp/snip/snippets.txt', 'w') as file:
                     for element in self.SnippetList:
                         file.writelines('file ' + '\'' + element + "\'\n")
                     file.close()
                 os.system("ffmpeg -f concat -i {}snippets.txt -codec copy {}/{}_anomalous.mp4".format(list_path, output_path,
                                                                                                       vidname))
+                self.dismisspopup()
             self.SnippetList = []
             self.ids.plot_image.opacity = 0
             self.ids.Snippets.remove_widget(self.SS)
             self.SS = ScrollScreen()
         def dismisspopup(self):
 
-            popup.dismiss()
+            self.popup.dismiss()
 
 
         def errormessage(self):
@@ -370,7 +380,19 @@ Screen_Manager.add_widget(Settings(name = "Settings"))
 
 
 class EyeSpy(App):
+    def on_start(self):
+        self.profile = cProfile.Profile()
+        self.profile.enable()
 
+    def on_stop(self):
+        self.profile.disable()
+        self.profile.dump_stats('EyeSpy_Profile')
+
+        with open("profilingStatsAsText.txt", "w") as f:
+            p = pstats.Stats('EyeSpy_Profile',stream= f)
+
+            p.strip_dirs().sort_stats('cumulative')
+            p.print_stats()
     def build(self):
 
         if not os.path.exists('./Appdata'):

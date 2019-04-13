@@ -21,9 +21,11 @@ from PIL import Image
 import sys
 import Main
 import anomalydetector
-
+from kivy.utils import rgba
+from kivy.uix.label import Label
 
 def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,RUN_GPU = True, BATCH_SIZE = 10):
+
 
 	resize_w = 112
 	resize_h = 171
@@ -38,7 +40,7 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 	feature_dim = 4096 if EXTRACTED_LAYER != 5 else 8192
 	mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
 	mainmenu.ids.videoplayer.state = 'stop'
-
+	mainmenu.popup.content = Label(text='Features are being extracted..(1/3)', color=rgba('#DAA520'), font_size=24)
 
 	gpu_id = 0
 
