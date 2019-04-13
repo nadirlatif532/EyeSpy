@@ -47,11 +47,12 @@ from kivy.uix.checkbox import CheckBox
 import cv2
 import shutil
 import sqlite3
-import cProfile
-import pstats
 from kivy.clock import Clock
 import torch
 from functools import partial
+#import cProfile
+#import pstats
+
 
 LabelBase.register(name = 'Helvetica', fn_regular='Helvetica_Regular.ttf', fn_bold='Helvetica_Bold.ttf')
 Builder.load_file('eyespy_kv.kv')
@@ -388,6 +389,8 @@ Screen_Manager.add_widget(Settings(name = "Settings"))
 
 
 class EyeSpy(App):
+    '''
+    Profiling Code
     def on_start(self):
         self.profile = cProfile.Profile()
         self.profile.enable()
@@ -401,6 +404,7 @@ class EyeSpy(App):
 
             p.strip_dirs().sort_stats('cumulative')
             p.print_stats()
+    '''
     def build(self):
 
         if not os.path.exists('./Appdata'):
