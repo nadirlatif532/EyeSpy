@@ -50,6 +50,7 @@ import sqlite3
 import cProfile
 import pstats
 from kivy.clock import Clock
+import torch
 LabelBase.register(name = 'Helvetica', fn_regular='Helvetica_Regular.ttf', fn_bold='Helvetica_Bold.ttf')
 Builder.load_file('eyespy_kv.kv')
 path = '.\\Appdata\\Eyespy.mp4'
@@ -105,6 +106,11 @@ class MainMenu(Screen):
                           auto_dismiss=False, size_hint=(0.5, 0.5))
 
         def on_pre_enter(self):
+            settings = App.get_running_app().root.get_screen("Settings")
+            if torch.cuda.device_count() > 0:
+                self.GPU_Flag = True
+                settings.ids.check.active = True
+
             Window.borderless = False
             #Window.fullscreen = 'auto'
             Window.position = 'custom'
@@ -113,7 +119,7 @@ class MainMenu(Screen):
 
         def Set_Gpu(self,state):
             self.GPU_Flag = state
-            print(self.GPU_Flag)
+            print("Executing on GPU: " + self.GPU_Flag)
 
         def filebrowse(self):
             self.SnippetList = []
@@ -426,7 +432,6 @@ class EyeSpy(App):
             conn.commit()
             conn.execute("""insert into login (username, password,admin) VALUES (?, ?, ?);""", ('admin', 'admin','1'))
             conn.commit()
-
 
         Window.borderless = True
         self.icon = 'Media/eyespy_notext.png'
