@@ -30,7 +30,6 @@ from kivy.uix.widget import Widget
 import kivy.uix.videoplayer
 from kivy.uix.videoplayer import VideoPlayer
 from kivy.uix.video import Video
-from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.button import Button,ButtonBehavior
 from kivy.garden.filebrowser import FileBrowser
 from kivy.factory import Factory
@@ -47,7 +46,6 @@ from kivy.uix.checkbox import CheckBox
 import cv2
 import shutil
 import sqlite3
-from kivy.clock import Clock
 import torch
 from functools import partial
 #import cProfile
@@ -56,7 +54,7 @@ from functools import partial
 
 LabelBase.register(name = 'Helvetica', fn_regular='Helvetica_Regular.ttf', fn_bold='Helvetica_Bold.ttf')
 Builder.load_file('eyespy_kv.kv')
-path = '.\\Appdata\\Eyespy.mp4'
+path = '.\\Appdata\\Eyespy_noext.mp4'
 feature_path = './Appdata/temp/textfeatures/'
 Snippet_List = list()
 dbName = "Appdata/eyespy.db"
@@ -80,10 +78,11 @@ class LoginScreen(Screen):
                 print("Login Successful")
                 self.ids.login_error.opacity = 0
                 self.ids.loginbtn.color = rgba('#c8c8c8')
-                Screen_Manager.current = 'MainMenu'
                 Window.size = (1024, 768)
                 Window.left = 500
                 Window.top = 150
+                Screen_Manager.current = 'MainMenu'
+
         if record_exists == False:
             self.ids.login_error.opacity = 1
 
@@ -138,6 +137,7 @@ class MainMenu(Screen):
             os.makedirs('./Appdata/temp/frames')
             os.makedirs('./Appdata/temp/textfeatures')
             os.makedirs('./Appdata/temp/plot')
+            self.popup.content = Label(text='Features are being extracted..(1/3)', color=rgba('#DAA520'), font_size=24)
             self.file_popup.start()
         def change_to_live(self):
             Screen_Manager.current = 'Live'
@@ -167,6 +167,7 @@ class MainMenu(Screen):
                 pass
         def SaveSnippet(self):
             self.popup.content = Label(text='Saving Snippets', color=rgba('#DAA520'), font_size=24)
+            self.ids.videoplayer.state = 'stop'
             try:
                 f = open('./Appdata/config.txt')
                 lines = f.readlines()
@@ -180,7 +181,7 @@ class MainMenu(Screen):
             list_path = 'Appdata/temp/snip/'
 
             if not self.SnippetList:
-                self.popup.content = Label(text='Please Add Snippets to save', color=rgba('#DAA520'), font_size=24)
+                self.popup.content = Label(text='Please add Snippets to save', color=rgba('#DAA520'), font_size=24)
                 self.popup.open()
                 Clock.schedule_once(partial(self.dismisspopup),1)
 
@@ -191,12 +192,15 @@ class MainMenu(Screen):
                         file.writelines('file ' + '\'' + element + "\'\n")
                     file.close()
                 os.system("ffmpeg -f concat -i {}snippets.txt -codec copy {}/{}_anomalous.mp4".format(list_path, output_path,
+
                                                                                                       vidname))
                 self.dismisspopup()
                 self.SnippetList = []
                 self.ids.plot_image.opacity = 0
                 self.ids.Snippets.remove_widget(self.SS)
                 self.SS = ScrollScreen()
+                self.ids.videoplayer.source = '.\\Appdata\\Eyespy_noext.mp4'
+                self.ids.videoplayer.state = 'play'
         def dismisspopup(self, *args):
 
             self.popup.dismiss()
@@ -230,7 +234,7 @@ class Snippet(GridLayout):
             mainmenu.SnippetList.append(group)
         else:
             mainmenu.SnippetList.remove(group)
-        print(mainmenu.SnippetList)
+        #print(mainmenu.SnippetList)
 class DisplayRoot(GridLayout):
     pass
 

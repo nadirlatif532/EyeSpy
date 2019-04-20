@@ -122,12 +122,10 @@ def anomalydetector(vidpath,featpath,video_name):
 
     cap = cv2.VideoCapture(video_path)
 
-    print(cv2)
     Total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     total_segments = np.linspace(1, Total_frames, num=33)
     total_segments = total_segments.round()
 
-    print(featpath)
     feature_text = video_name + '.txt'
 
     FeaturePath = os.path.join(featpath, feature_text)
@@ -170,6 +168,9 @@ def anomalydetector(vidpath,featpath,video_name):
     break_pt=min(scoressmoothed.shape[0], x.shape[0])
     plt.axis([0, Total_frames, 0, 1])
     i=j=k=0
+
+
+
     snip_n=1
     OUTPUT_DIR = os.path.dirname(os.path.realpath(__file__))
     AppData = os.path.join(OUTPUT_DIR, 'AppData')
@@ -183,9 +184,9 @@ def anomalydetector(vidpath,featpath,video_name):
         os.makedirs(snipdir)
     if (os.path.exists(framedir)):
         shutil.rmtree(framedir)
-
     if not os.path.exists(framedir):
         os.makedirs(framedir)
+
     snipdesc=[]
     sniplist=[]
     totalscore=0

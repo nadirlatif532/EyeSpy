@@ -36,7 +36,7 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 	if RUN_GPU : 
 		net.cuda(0)
 		net.eval()
-		print('net', net)
+
 	feature_dim = 4096 if EXTRACTED_LAYER != 5 else 8192
 	mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
 	mainmenu.ids.videoplayer.state = 'stop'
@@ -189,7 +189,6 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 	DR = Main.DisplayRoot()
 
 	for snip_vids in sniplist:
-		print(snip_vids)
 		severity = float(snip_vids[2])
 		thumbnail_path = os.path.join(TEMP_PATH,snip_vids[1])
 		print(thumbnail_path)
