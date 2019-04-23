@@ -442,21 +442,22 @@
             valign: 'center'
             font_size: 14
             color: rgba('#DAA520')
-            pos_hint: {'x': -0.18, 'y': 0.3}
+            pos_hint: {'x': -0.17, 'y': 0.3}
         Label:
+            id: gpu_text
             font_name: 'Helvetica_Bold'
-            text: 'Run using GPU (Please uncheck if No GPU)'
+            text: 'Run using GPU: '
             halign: 'center'
             valign: 'center'
             font_size: 14
             color: rgba('#DAA520')
-            pos_hint: {'x': -0.1, 'y': 0.15}
+            pos_hint: {'x': -0.18, 'y': 0.15}
 
         CheckBox:
             id: check
-            size_hint: 0.5,1
+            size_hint: 0.05,0.05
             on_active: root.Set_GPU()
-            pos_hint: {'x': 0.35, 'y': 0.15}
+            pos_hint: {'x': 0.72, 'y': 0.625}
             active: False
 
         Label:

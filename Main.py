@@ -51,21 +51,33 @@ from functools import partial
 #import cProfile
 #import pstats
 
-
+'''
+Global Declaration of Required Properties
+'''
 LabelBase.register(name = 'Helvetica', fn_regular='Helvetica_Regular.ttf', fn_bold='Helvetica_Bold.ttf')
 Builder.load_file('eyespy_kv.kv')
-path = '.\\Appdata\\Eyespy_noext.mp4'
+path = './Appdata/Eyespy_noext.mp4'
 feature_path = './Appdata/temp/textfeatures/'
 Snippet_List = list()
 dbName = "Appdata/eyespy.db"
 table_name = "login"
-class LoginScreen(Screen):
 
+class LoginScreen(Screen):
+    '''
+        Login Screen of the Application
+    '''
     def __init__(self, **kwargs):
         super(LoginScreen, self).__init__(**kwargs)
         Window.size = (400, 600)
 
     def Login(self):
+        '''
+        Input: None
+        Output: None
+        Desc: Check Login info from DB and Proceed to MainMenu if Success
+        else Show Error
+
+        '''
         Username = self.ids.username.text
         Password = self.ids.password.text
         conn = sqlite3.connect(dbName)
@@ -95,8 +107,14 @@ class LoginScreen(Screen):
         self.ids.loginbtn.color = rgba('#DAA520')
 
 class MainMenu(Screen):
-
+      '''
+        MainMenu, Contains all the Anomaly Detection Frontend (Offline)
+      '''
         def __init__(self,**kwargs):
+            '''
+            Desc: Define the MainMenu Class Variables
+
+            '''
             global path
             super(MainMenu, self).__init__(**kwargs)
             self.file_popup = FilePopup()
@@ -108,22 +126,49 @@ class MainMenu(Screen):
                           auto_dismiss=False, size_hint=(0.5, 0.5))
 
         def on_pre_enter(self):
+            '''
+            Desc: Test if a CUDA enables GPU is present. If not Disable the CPU/GPU Switch
+
+            '''
             settings = App.get_running_app().root.get_screen("Settings")
             if torch.cuda.device_count() > 0:
                 self.GPU_Flag = True
                 settings.ids.check.active = True
+            else:
+                settings.ids.check.disabled = True
+                settings.ids.check.opacity = 0
+                settings.ids.gpu_text.opacity = 0
 
             Window.borderless = False
             #Window.fullscreen = 'auto'
             Window.position = 'custom'
+
         def on_enter(self, *args):
+            '''
+            Desc: AutoPlay the Video on Enter
+            '''
             self.ids.videoplayer.state = 'play'
 
         def Set_Gpu(self,state):
+            '''
+            Input: State of GPU Checkbox in Settings
+
+            Desc: Set GPU Flag to control GPU Execution
+            '''
+
             self.GPU_Flag = state
             print("Executing on GPU: " + str(self.GPU_Flag))
 
         def filebrowse(self):
+            '''
+            Desc: Called When Add Video Button is Pressed, works:
+            1) Clear Widget Scrollscreen
+            2) Clear Temp folder
+            3) Create New Temp Directories
+            4) Open FileBrowser
+
+            '''
+
             self.SnippetList = []
             self.ids.plot_image.opacity = 0
             self.ids.Snippets.remove_widget(self.SS)
@@ -139,6 +184,7 @@ class MainMenu(Screen):
             os.makedirs('./Appdata/temp/plot')
             self.popup.content = Label(text='Features are being extracted..(1/3)', color=rgba('#DAA520'), font_size=24)
             self.file_popup.start()
+
         def change_to_live(self):
             Screen_Manager.current = 'Live'
 
@@ -146,6 +192,10 @@ class MainMenu(Screen):
             Screen_Manager.current = 'Settings'
 
         def changevideo(self):
+            '''
+            desc: Change VideoPlayer Source when a snippet is clicked.
+
+            '''
             global path
             mainmenu = App.get_running_app().root.get_screen('MainMenu')
             mainmenu.ids.videoplayer.source = ''
@@ -154,6 +204,10 @@ class MainMenu(Screen):
             return
 
         def featureExtraction(self):
+            '''
+            Desc: Called when the Videoplayer source is changed. Creates a thread and calls the feature extractor)
+
+            '''
 
             mainmenu = App.get_running_app().root.get_screen('MainMenu')
             if mainmenu.ids.videoplayer.source == '':
@@ -165,7 +219,19 @@ class MainMenu(Screen):
                 self.popup.open()
             else:
                 pass
+
         def SaveSnippet(self):
+            '''
+            Desc: Called when the save snippet button is clicked.
+            1) If no Snippets are selected, Show popup and wait for selection.
+
+            else
+
+            2) concatenate the snippets and save them in the output directory
+            3) clear the snippet lists and populate it with the new snippets
+
+            '''
+
             self.popup.content = Label(text='Saving Snippets', color=rgba('#DAA520'), font_size=24)
             self.ids.videoplayer.state = 'stop'
             try:
@@ -210,16 +276,24 @@ class MainMenu(Screen):
             print('Sahi File de bharwe')
 
 
-class ImageButton(ButtonBehavior, AsyncImage):
-    pass
+
+
 class Snippet(GridLayout):
+
     def __init__(self, *args, **kwargs):
+        '''
+        Desc: Create a Snippet object from *args
+
+        '''
         super(Snippet, self).__init__(**kwargs)
         self.ids.thumbnail.source = args[0]
         self.ids.severity.source = args[1]
         self.ids.check.group = args[2]
 
     def thumb_to_video(self,thumb_source):
+        '''
+        Desc: Change VideoPlayer Source when a snippet is clicked.
+        '''
         thumb_source = thumb_source[:-8]
         vid_path = thumb_source + '_noext' + '.mp4'
 
@@ -228,6 +302,9 @@ class Snippet(GridLayout):
         mainmenu.ids.videoplayer.state = 'play'
 
     def add_snippet(self,group,value):
+        '''
+        Desc: toggle the Snippet in the SnippetList
+        '''
         mainmenu = App.get_running_app().root.get_screen("MainMenu")
 
         if value == True:
@@ -235,14 +312,12 @@ class Snippet(GridLayout):
         else:
             mainmenu.SnippetList.remove(group)
         #print(mainmenu.SnippetList)
-class DisplayRoot(GridLayout):
-    pass
-
-class ScrollScreen(ScrollView):
-    pass
 
 
 class Live(Screen):
+    '''
+        Live Screen (Implementation In progress)
+    '''
     def __init__(self, **kwargs):
         super(Live, self).__init__(**kwargs)
 
@@ -258,7 +333,14 @@ class Live(Screen):
         Screen_Manager.current = 'MainMenu'
 
 class Settings(Screen):
+    '''
+        Settings screen for changing options
+    '''
     def __init__(self, **kwargs):
+        '''
+        Desc: Read config file and show paths
+
+        '''
         super(Settings, self).__init__(**kwargs)
         self.file_popup = FilePopup()
         self.flag = 0
@@ -278,12 +360,26 @@ class Settings(Screen):
 
 
     def filebrowse_input(self):
+        '''
+        Desc: Set input folder for videos
+
+        '''
         self.flag = 0
         self.file_popup.start()
+
     def filebrowse_output(self):
+        '''
+            Desc: Set output folder for videos
+
+        '''
         self.flag = 1
         self.file_popup.start()
+
     def load_paths(self):
+        '''
+        Desc: Reload paths from config file
+
+        '''
         try:
             f = open('./Appdata/config.txt')
             lines = f.readlines()
@@ -303,14 +399,23 @@ class Settings(Screen):
 
     def change_to_offline(self):
         Screen_Manager.current = 'MainMenu'
+
     def Set_GPU(self):
+        '''
+        Desc: Change state of GPU_flag
+
+        '''
         mainmenu = App.get_running_app().root.get_screen("MainMenu")
+
         if self.ids.check.active == True:
             mainmenu.Set_Gpu(True)
         else:
             mainmenu.Set_Gpu(False)
 
 class FilePopup():
+    '''
+        Desc: The Filebrowser class
+    '''
     def __init__(self, short_text='File Browser'):
 
         try:
@@ -343,15 +448,20 @@ class FilePopup():
         )
 
     def _fbrowser_canceled(self, instance):
-        print ('cancelled, Close self.')
+        '''
+        Desc: File Browser cancel event, Do nothing and close file browser
 
+        '''
         self.popup.dismiss()
 
     def _fbrowser_success(self, instance):
+        '''
+            Desc: File Browser Success event, sets the correct path
+
+        '''
         global path
         path = instance.selection
         path = ''.join(path)
-        #print(path)
         if os.path.isfile(path):
             if path.find('.mp4'):
                 mainmenu = App.get_running_app().root.get_screen('MainMenu')
@@ -381,7 +491,9 @@ class FilePopup():
         self.popup.open()
 
 
-
+'''
+    Desc: ScreenManager to define the structure of the application 
+'''
 Screen_Manager = ScreenManager(transition = FadeTransition())
 
 Screen_Manager.add_widget(LoginScreen(name = "LoginScreen"))
@@ -389,27 +501,31 @@ Screen_Manager.add_widget(MainMenu(name = "MainMenu"))
 Screen_Manager.add_widget(Live(name = "Live"))
 Screen_Manager.add_widget(Settings(name = "Settings"))
 
+class ImageButton(ButtonBehavior, AsyncImage):
+    pass
 
+class DisplayRoot(GridLayout):
+    pass
+
+class ScrollScreen(ScrollView):
+    pass
 
 
 class EyeSpy(App):
+
     '''
-    Profiling Code
-    def on_start(self):
-        self.profile = cProfile.Profile()
-        self.profile.enable()
-
-    def on_stop(self):
-        self.profile.disable()
-        self.profile.dump_stats('EyeSpy_Profile')
-
-        with open("profilingStatsAsText.txt", "w") as f:
-            p = pstats.Stats('EyeSpy_Profile',stream= f)
-
-            p.strip_dirs().sort_stats('cumulative')
-            p.print_stats()
+    Desc: Main App Class, Entry point of the application
     '''
     def build(self):
+        '''
+        Desc: The entry function of the application:
+        1) Clear the temp directory.
+        2) Create config if it doesn't exist
+        3) Create Connection with the Database
+        4) Return ScreenManager as the Root Widget
+
+
+        '''
 
         if not os.path.exists('./Appdata'):
             os.makedirs('./Appdata')
