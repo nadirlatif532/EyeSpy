@@ -48,8 +48,7 @@ import shutil
 import sqlite3
 import torch
 from functools import partial
-#import cProfile
-#import pstats
+
 
 '''
 Global Declaration of Required Properties
@@ -61,6 +60,16 @@ feature_path = './Appdata/temp/textfeatures/'
 Snippet_List = list()
 dbName = "Appdata/eyespy.db"
 table_name = "login"
+
+class ImageButton(ButtonBehavior, AsyncImage):
+    pass
+
+class DisplayRoot(GridLayout):
+    pass
+
+class ScrollScreen(ScrollView):
+    pass
+
 
 class LoginScreen(Screen):
     '''
@@ -107,173 +116,175 @@ class LoginScreen(Screen):
         self.ids.loginbtn.color = rgba('#DAA520')
 
 class MainMenu(Screen):
-      '''
+    '''
         MainMenu, Contains all the Anomaly Detection Frontend (Offline)
-      '''
-        def __init__(self,**kwargs):
-            '''
-            Desc: Define the MainMenu Class Variables
+    '''
+    def __init__(self,**kwargs):
+        '''
+        Desc: Define the MainMenu Class Variables
 
-            '''
-            global path
-            super(MainMenu, self).__init__(**kwargs)
-            self.file_popup = FilePopup()
-            self.SnippetList = list()
-            self.GPU_Flag = False
-            self.SS = ScrollScreen()
-            self.popup = Popup(title='Please Wait',
-                          content=Label(text='Video is being processed', color=rgba('#DAA520'), font_size=24),
-                          auto_dismiss=False, size_hint=(0.5, 0.5))
+        '''
+        global path
+        super(MainMenu, self).__init__(**kwargs)
+        self.file_popup = FilePopup()
+        self.SnippetList = list()
+        self.GPU_Flag = False
+        self.SS = ScrollScreen()
+        self.popup = Popup(title='Please Wait',
+                      content=Label(text='Video is being processed', color=rgba('#DAA520'), font_size=24),
+                      auto_dismiss=False, size_hint=(0.5, 0.5))
 
-        def on_pre_enter(self):
-            '''
-            Desc: Test if a CUDA enables GPU is present. If not Disable the CPU/GPU Switch
+    def on_pre_enter(self):
+        '''
+        Desc: Test if a CUDA enables GPU is present. If not Disable the CPU/GPU Switch
 
-            '''
-            settings = App.get_running_app().root.get_screen("Settings")
-            if torch.cuda.device_count() > 0:
-                self.GPU_Flag = True
-                settings.ids.check.active = True
-            else:
-                settings.ids.check.disabled = True
-                settings.ids.check.opacity = 0
-                settings.ids.gpu_text.opacity = 0
+        '''
+        settings = App.get_running_app().root.get_screen("Settings")
+        if torch.cuda.device_count() > 0:
+            self.GPU_Flag = True
+            settings.ids.check.active = True
+        else:
+            settings.ids.check.disabled = True
+            settings.ids.check.opacity = 0
+            settings.ids.gpu_text.opacity = 0
 
-            Window.borderless = False
-            #Window.fullscreen = 'auto'
-            Window.position = 'custom'
+        Window.borderless = False
+        #Window.fullscreen = 'auto'
+        Window.position = 'custom'
 
-        def on_enter(self, *args):
-            '''
-            Desc: AutoPlay the Video on Enter
-            '''
-            self.ids.videoplayer.state = 'play'
+    def on_enter(self, *args):
+        '''
+        Desc: AutoPlay the Video on Enter
+        '''
+        self.ids.videoplayer.state = 'play'
 
-        def Set_Gpu(self,state):
-            '''
-            Input: State of GPU Checkbox in Settings
+    def Set_Gpu(self,state):
+        '''
+        Input: State of GPU Checkbox in Settings
 
-            Desc: Set GPU Flag to control GPU Execution
-            '''
+        Desc: Set GPU Flag to control GPU Execution
+        '''
 
-            self.GPU_Flag = state
-            print("Executing on GPU: " + str(self.GPU_Flag))
+        self.GPU_Flag = state
+        print("Executing on GPU: " + str(self.GPU_Flag))
 
-        def filebrowse(self):
-            '''
-            Desc: Called When Add Video Button is Pressed, works:
-            1) Clear Widget Scrollscreen
-            2) Clear Temp folder
-            3) Create New Temp Directories
-            4) Open FileBrowser
+    def filebrowse(self):
+        '''
+        Desc: Called When Add Video Button is Pressed, works:
+        1) Clear Widget Scrollscreen
+        2) Clear Temp folder
+        3) Create New Temp Directories
+        4) Open FileBrowser
 
-            '''
+        '''
 
+        self.SnippetList = []
+        self.ids.plot_image.opacity = 0
+        self.ids.Snippets.remove_widget(self.SS)
+        self.SS = ScrollScreen()
+        self.ids.videoplayer.source = ''
+        if os.path.exists('./Appdata/temp'):
+            shutil.rmtree("./Appdata/temp/")
+
+        os.makedirs('./Appdata/temp')
+        os.makedirs('./Appdata/temp/snip')
+        os.makedirs('./Appdata/temp/frames')
+        os.makedirs('./Appdata/temp/textfeatures')
+        os.makedirs('./Appdata/temp/plot')
+        self.popup.content = Label(text='Features are being extracted..(1/3)', color=rgba('#DAA520'), font_size=24)
+        self.file_popup.start()
+
+    def change_to_live(self):
+        Screen_Manager.current = 'Live'
+
+    def image_press(*args):
+        Screen_Manager.current = 'Settings'
+
+    def changevideo(self):
+        '''
+        desc: Change VideoPlayer Source when a snippet is clicked.
+
+        '''
+        global path
+        mainmenu = App.get_running_app().root.get_screen('MainMenu')
+        mainmenu.ids.videoplayer.source = ''
+        mainmenu.ids.videoplayer.source = path
+        print(path)
+        return
+
+    def featureExtraction(self):
+
+        '''
+        Desc: Called when the Videoplayer source is changed. Creates a thread and calls the feature extractor)
+
+        '''
+
+        mainmenu = App.get_running_app().root.get_screen('MainMenu')
+        if mainmenu.ids.videoplayer.source == '':
+            return
+        if '_noext' not in mainmenu.ids.videoplayer.source:
+            thread = Thread(target=feature_extractor.feature_extractor, args = (feature_path, path, './Appdata/temp/snip/', 6, mainmenu.GPU_Flag))
+            thread.daemon = True
+            thread.start()
+            self.popup.open()
+        else:
+            pass
+
+    def SaveSnippet(self):
+
+        '''
+        Desc: Called when the save snippet button is clicked.
+        1) If no Snippets are selected, Show popup and wait for selection.
+
+        else
+
+        2) concatenate the snippets and save them in the output directory
+        3) clear the snippet lists and populate it with the new snippets
+
+        '''
+
+        self.popup.content = Label(text='Saving Snippets', color=rgba('#DAA520'), font_size=24)
+        self.ids.videoplayer.state = 'stop'
+        try:
+            f = open('./Appdata/config.txt')
+            lines = f.readlines()
+            f.close()
+            video_output_path = lines[1]
+            video_output_path = video_output_path[:-1]
+            output_path = video_output_path
+        except:
+            output_path = 'Appdata/output/'
+        vidname = os.path.basename(path)
+        list_path = 'Appdata/temp/snip/'
+
+        if not self.SnippetList:
+            self.popup.content = Label(text='Please add Snippets to save', color=rgba('#DAA520'), font_size=24)
+            self.popup.open()
+            Clock.schedule_once(partial(self.dismisspopup),1)
+
+        else:
+            self.popup.open()
+            with open('Appdata/temp/snip/snippets.txt', 'w') as file:
+                for element in self.SnippetList:
+                    file.writelines('file ' + '\'' + element + "\'\n")
+                file.close()
+            os.system("ffmpeg -f concat -i {}snippets.txt -codec copy {}/{}_anomalous.mp4".format(list_path, output_path,
+
+                                                                                                  vidname))
+            self.dismisspopup()
             self.SnippetList = []
             self.ids.plot_image.opacity = 0
             self.ids.Snippets.remove_widget(self.SS)
             self.SS = ScrollScreen()
-            self.ids.videoplayer.source = ''
-            if os.path.exists('./Appdata/temp'):
-                shutil.rmtree("./Appdata/temp/")
+            self.ids.videoplayer.source = '.\\Appdata\\Eyespy_noext.mp4'
+            self.ids.videoplayer.state = 'play'
+    def dismisspopup(self, *args):
 
-            os.makedirs('./Appdata/temp')
-            os.makedirs('./Appdata/temp/snip')
-            os.makedirs('./Appdata/temp/frames')
-            os.makedirs('./Appdata/temp/textfeatures')
-            os.makedirs('./Appdata/temp/plot')
-            self.popup.content = Label(text='Features are being extracted..(1/3)', color=rgba('#DAA520'), font_size=24)
-            self.file_popup.start()
-
-        def change_to_live(self):
-            Screen_Manager.current = 'Live'
-
-        def image_press(*args):
-            Screen_Manager.current = 'Settings'
-
-        def changevideo(self):
-            '''
-            desc: Change VideoPlayer Source when a snippet is clicked.
-
-            '''
-            global path
-            mainmenu = App.get_running_app().root.get_screen('MainMenu')
-            mainmenu.ids.videoplayer.source = ''
-            mainmenu.ids.videoplayer.source = path
-            print(path)
-            return
-
-        def featureExtraction(self):
-            '''
-            Desc: Called when the Videoplayer source is changed. Creates a thread and calls the feature extractor)
-
-            '''
-
-            mainmenu = App.get_running_app().root.get_screen('MainMenu')
-            if mainmenu.ids.videoplayer.source == '':
-                return
-            if '_noext' not in mainmenu.ids.videoplayer.source:
-                thread = Thread(target=feature_extractor.feature_extractor, args = (feature_path, path, './Appdata/temp/snip/', 6, mainmenu.GPU_Flag))
-                thread.daemon = True
-                thread.start()
-                self.popup.open()
-            else:
-                pass
-
-        def SaveSnippet(self):
-            '''
-            Desc: Called when the save snippet button is clicked.
-            1) If no Snippets are selected, Show popup and wait for selection.
-
-            else
-
-            2) concatenate the snippets and save them in the output directory
-            3) clear the snippet lists and populate it with the new snippets
-
-            '''
-
-            self.popup.content = Label(text='Saving Snippets', color=rgba('#DAA520'), font_size=24)
-            self.ids.videoplayer.state = 'stop'
-            try:
-                f = open('./Appdata/config.txt')
-                lines = f.readlines()
-                f.close()
-                video_output_path = lines[1]
-                video_output_path = video_output_path[:-1]
-                output_path = video_output_path
-            except:
-                output_path = 'Appdata/output/'
-            vidname = os.path.basename(path)
-            list_path = 'Appdata/temp/snip/'
-
-            if not self.SnippetList:
-                self.popup.content = Label(text='Please add Snippets to save', color=rgba('#DAA520'), font_size=24)
-                self.popup.open()
-                Clock.schedule_once(partial(self.dismisspopup),1)
-
-            else:
-                self.popup.open()
-                with open('Appdata/temp/snip/snippets.txt', 'w') as file:
-                    for element in self.SnippetList:
-                        file.writelines('file ' + '\'' + element + "\'\n")
-                    file.close()
-                os.system("ffmpeg -f concat -i {}snippets.txt -codec copy {}/{}_anomalous.mp4".format(list_path, output_path,
-
-                                                                                                      vidname))
-                self.dismisspopup()
-                self.SnippetList = []
-                self.ids.plot_image.opacity = 0
-                self.ids.Snippets.remove_widget(self.SS)
-                self.SS = ScrollScreen()
-                self.ids.videoplayer.source = '.\\Appdata\\Eyespy_noext.mp4'
-                self.ids.videoplayer.state = 'play'
-        def dismisspopup(self, *args):
-
-            self.popup.dismiss()
+        self.popup.dismiss()
 
 
-        def errormessage(self):
-            print('Sahi File de bharwe')
+    def errormessage(self):
+        print('Sahi File de bharwe')
 
 
 
@@ -501,14 +512,6 @@ Screen_Manager.add_widget(MainMenu(name = "MainMenu"))
 Screen_Manager.add_widget(Live(name = "Live"))
 Screen_Manager.add_widget(Settings(name = "Settings"))
 
-class ImageButton(ButtonBehavior, AsyncImage):
-    pass
-
-class DisplayRoot(GridLayout):
-    pass
-
-class ScrollScreen(ScrollView):
-    pass
 
 
 class EyeSpy(App):
