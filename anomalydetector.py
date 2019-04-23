@@ -194,6 +194,8 @@ def anomalydetector(vidpath,featpath,video_name):
         frameId = cap.get(1)
         flag, frame = cap.read()
         threshold = np.mean(scoressmoothed)
+        if (threshold < 0.0002):
+            break
 
         framescore = scoressmoothed[int(frameId)]
         if (framescore > threshold):
@@ -234,11 +236,12 @@ def anomalydetector(vidpath,featpath,video_name):
         os.makedirs(plotdir)
     plotpath = os.path.join(plotdir,video_name[:-4])
     fig = plt.figure()
-    fig.patch.set_color('#2F323A')
+    fig.patch.set_alpha(0)
+
     plot = fig.add_subplot(1, 1, 1)
     plot.set_facecolor('#545F66')
 
-    plt.plot(x, scoressmoothed, color='#AA0000', linewidth=2)
+    plt.plot(x, scoressmoothed, color='#CC0000', linewidth=2)
     plt.savefig(plotpath)
     plt.close()
 

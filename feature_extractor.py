@@ -25,6 +25,16 @@ from kivy.utils import rgba
 from kivy.uix.label import Label
 
 def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,RUN_GPU = True, BATCH_SIZE = 10):
+	"""
+
+	:param OUTPUT_DIR_TEXT:
+	:param VIDEO_PATH:
+	:param TEMP_PATH:
+	:param EXTRACTED_LAYER:
+	:param RUN_GPU:
+	:param BATCH_SIZE:
+	:return:
+	"""
 
 
 	resize_w = 112
