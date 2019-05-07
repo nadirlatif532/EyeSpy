@@ -129,6 +129,7 @@ class MainMenu(Screen):
         self.file_popup = FilePopup()
         self.SnippetList = list()
         self.GPU_Flag = False
+        self.Batch_Flag = False
         self.SS = ScrollScreen()
         self.popup = Popup(title='Please Wait',
                       content=Label(text='Video is being processed', color=rgba('#DAA520'), font_size=24),
@@ -212,23 +213,91 @@ class MainMenu(Screen):
         print(path)
         return
 
+
+
+    def batch_processing(self):
+
+        self.ids.videoplayer.state = 'pause'
+
+        self.Batch_Flag = True
+        self.popup.content = Label(
+                text='Videos are being processed...This will take long',
+                color=rgba('#DAA520'), font_size=20)
+        self.popup.open()
+        self.featureExtraction()
+
+
     def featureExtraction(self):
 
         '''
         Desc: Called when the Videoplayer source is changed. Creates a thread and calls the feature extractor)
 
         '''
-
+        global path
         mainmenu = App.get_running_app().root.get_screen('MainMenu')
-        if mainmenu.ids.videoplayer.source == '':
-            return
-        if '_noext' not in mainmenu.ids.videoplayer.source:
-            thread = Thread(target=feature_extractor.feature_extractor, args = (feature_path, path, './Appdata/temp/snip/', 6, mainmenu.GPU_Flag))
+        if self.Batch_Flag == False:
+
+            if mainmenu.ids.videoplayer.source == '':
+                return
+            if '_noext' not in mainmenu.ids.videoplayer.source:
+                thread = Thread(target=feature_extractor.feature_extractor, args = (feature_path, path, './Appdata/temp/snip/', 6, mainmenu.GPU_Flag))
+                thread.daemon = True
+                thread.start()
+                self.popup.open()
+            else:
+                pass
+        else:
+            try:
+                f = open('./Appdata/config.txt')
+                lines = f.readlines()
+                f.close()
+                video_input_path = lines[0]
+                video_input_path = video_input_path[:-1]
+                input_path = video_input_path
+                full_path = input_path
+
+                input_path = os.listdir(input_path)
+            except:
+                print("Please set the input directory")
+            video_count = 0
+            videos_in_folder = []
+
+            for videos in input_path:
+                if videos.endswith('.mp4'):
+                    video_count = video_count+1
+                    videos_in_folder.append(videos)
+
+            thread = Thread(target=self.Batch_Loop,
+                            args=(feature_path, full_path, './Appdata/temp/snip/', 6, mainmenu.GPU_Flag,videos_in_folder, video_count))
             thread.daemon = True
             thread.start()
-            self.popup.open()
-        else:
-            pass
+
+
+
+    def Batch_Loop(self, feature_path, full_path, snippet_path, batch_size, gpu_flag,videos_in_folder, video_count ):
+
+        current_video = 0
+        self.popup.content = Label(
+            text='Processing Video..(' + str(current_video)+ '/' + str(video_count) + ')' ,
+            color=rgba('#DAA520'), font_size=20)
+        for video in videos_in_folder:
+            if '_noext' not in video:
+                current_video = current_video + 1
+                self.popup.content = Label(
+                    text='Processing Video..(' + str(current_video) + '/' + str(video_count) + ')',
+                    color=rgba('#DAA520'), font_size=20)
+                path = full_path + '/' + video
+                feature_extractor.feature_extractor(feature_path,path,snippet_path,batch_size,gpu_flag)
+
+        self.popup.content = Label(
+            text='Anomalous Snippets of Videos saved in the output folder',
+            color=rgba('#DAA520'), font_size=20)
+        Clock.schedule_once(partial(self.dismisspopup), 1)
+        mainmenu = App.get_running_app().root.get_screen('MainMenu')
+        mainmenu.ids.videoplayer.state = 'play'
+
+
+
 
     def SaveSnippet(self):
 
@@ -278,13 +347,13 @@ class MainMenu(Screen):
             self.SS = ScrollScreen()
             self.ids.videoplayer.source = '.\\Appdata\\Eyespy_noext.mp4'
             self.ids.videoplayer.state = 'play'
+
     def dismisspopup(self, *args):
 
         self.popup.dismiss()
 
 
-    def errormessage(self):
-        print('Sahi File de bharwe')
+
 
 
 
@@ -323,6 +392,9 @@ class Snippet(GridLayout):
         else:
             mainmenu.SnippetList.remove(group)
         #print(mainmenu.SnippetList)
+
+
+
 
 
 class Live(Screen):
@@ -474,7 +546,7 @@ class FilePopup():
         path = instance.selection
         path = ''.join(path)
         if os.path.isfile(path):
-            if path.find('.mp4'):
+            if path.endswith('.mp4'):
                 mainmenu = App.get_running_app().root.get_screen('MainMenu')
                 mainmenu.changevideo()
                 self.popup.dismiss()

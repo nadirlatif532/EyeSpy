@@ -109,11 +109,15 @@ def load_dataset_One_Video_Features(Feature_Path):
 
 
 def anomalydetector(vidpath,featpath,video_name):
-    mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
-    mainmenu.popup.content = Label(text='Predicting Anomalies..(2/3)', color=rgba('#DAA520'), font_size=24)
+
     Model_dir = os.path.dirname(os.path.realpath(__file__))
     weights_path = os.path.join(Model_dir, 'weights_L1L2.mat')
     model_path = os.path.join(Model_dir, 'model.json')
+
+    mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
+    if mainmenu.Batch_Flag == False:
+        mainmenu.popup.content = Label(text='Predicting Anomalies..(2/3)', color=rgba('#DAA520'), font_size=24)
+
 
 
     model = load_model(model_path)
@@ -176,7 +180,9 @@ def anomalydetector(vidpath,featpath,video_name):
     AppData = os.path.join(OUTPUT_DIR, 'AppData')
     if not os.path.exists(AppData):
         os.makedirs(AppData)
-    mainmenu.popup.content = Label(text='Extracting Snippets..(3/3)', color=rgba('#DAA520'), font_size=24)
+
+    if mainmenu.Batch_Flag == False:
+        mainmenu.popup.content = Label(text='Extracting Snippets..(3/3)', color=rgba('#DAA520'), font_size=24)
     framedir = os.path.join(AppData,os.path.join('temp','frames'))
     print(framedir)
     snipdir = os.path.join(AppData,os.path.join('temp','snip'))
@@ -234,7 +240,19 @@ def anomalydetector(vidpath,featpath,video_name):
     plotdir = os.path.join(AppData, os.path.join('temp', 'plot'))
     if not os.path.exists(plotdir):
         os.makedirs(plotdir)
-    plotpath = os.path.join(plotdir,video_name[:-4])
+    if mainmenu.Batch_Flag == False:
+        plotpath = os.path.join(plotdir,video_name[:-4])
+    else:
+        try:
+            f = open('./Appdata/config.txt')
+            lines = f.readlines()
+            f.close()
+            video_output_path = lines[1]
+            video_output_path = video_output_path[:-1]
+            output_path = video_output_path
+        except:
+            output_path = 'Appdata/output/'
+        plotpath = os.path.join(output_path, video_name[:-4])
     fig = plt.figure()
     fig.patch.set_alpha(0)
 
@@ -246,12 +264,14 @@ def anomalydetector(vidpath,featpath,video_name):
     plt.close()
 
 
-    mainmenu.ids.plot_image.source = plotpath + '.png'
-    mainmenu.ids.plot_image.opacity = 1
-
-    mainmenu.dismisspopup()
+    if mainmenu.Batch_Flag == False:
+        mainmenu.ids.plot_image.source = plotpath + '.png'
+        mainmenu.ids.plot_image.opacity = 1
+        mainmenu.dismisspopup()
 
     sniplist=(np.array(sniplist))
+
+
     return sniplist
 
 

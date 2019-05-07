@@ -24,7 +24,7 @@ import anomalydetector
 from kivy.utils import rgba
 from kivy.uix.label import Label
 
-def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,RUN_GPU = True, BATCH_SIZE = 10):
+def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH, EXTRACTED_LAYER = 6,RUN_GPU = True, BATCH_SIZE = 8 ):
 	"""
 
 	:param OUTPUT_DIR_TEXT:
@@ -35,7 +35,6 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 	:param BATCH_SIZE:
 	:return:
 	"""
-
 
 	resize_w = 112
 	resize_h = 171
@@ -50,8 +49,10 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 	feature_dim = 4096 if EXTRACTED_LAYER != 5 else 8192
 	mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
 	mainmenu.ids.videoplayer.state = 'stop'
-	mainmenu.popup.content = Label(text='Features are being extracted..(1/3)', color=rgba('#DAA520'), font_size=24)
-
+	if mainmenu.Batch_Flag == False:
+		mainmenu.popup.content = Label(text='Features are being extracted..(1/3)', color=rgba('#DAA520'), font_size=24)
+	else:
+		mainmenu.popup.open()
 	gpu_id = 0
 
 
@@ -107,7 +108,7 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 		for j in range(BATCH_SIZE):
 			clip = []
 			clip = np.array([resize(io.imread(os.path.join(frame_path, 'image_{:01d}.jpg'.format(k))), output_shape=(resize_w, resize_h), preserve_range=True) for k in range((i*BATCH_SIZE+j) * nb_frames+1, min((i*BATCH_SIZE+j+1) * nb_frames+1, valid_frames+1))])
-			clip = clip[:, 8: 120, 30: 142, :]
+			clip = clip[:, 8: 112, 30: 142, :]
 			input_blobs.append(clip)
 		input_blobs = np.array(input_blobs, dtype='float32')
 		print('input_blobs_shape', input_blobs.shape)
@@ -127,7 +128,7 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 							   min(int(((n_batch - 1) * BATCH_SIZE + j + 1) * nb_frames + 1), valid_frames + 1,
 								   int((((n_batch - 1) * BATCH_SIZE + j) * nb_frames + 1) + 15)))])
 
-		clip = clip[:, 8: 120, 30: 142, :]
+		clip = clip[:, 8: 112, 30: 142, :]
 		input_blobs.append(clip)
 	input_blobs = np.array(input_blobs, dtype='float32')
 	input_blobs = torch.from_numpy(np.float32(input_blobs.transpose(0, 4, 1, 2, 3)))
@@ -192,26 +193,63 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH,EXTRACTED_LAYER = 6,R
 
 
 	sniplist = anomalydetector.anomalydetector(VIDEO_PATH,OUTPUT_DIR_TEXT,video_name)
-	print(sniplist)
-	Severity_High = 'Media/severity_high.png'
-	Severity_Medium = 'Media/severity_medium.png'
-	Severity_Low = 'Media/severity_low.png'
-	DR = Main.DisplayRoot()
 
-	for snip_vids in sniplist:
-		severity = float(snip_vids[2])
-		thumbnail_path = os.path.join(TEMP_PATH,snip_vids[1])
-		print(thumbnail_path)
-		if(severity >= 0.7 ):
-			DR.add_widget(Main.Snippet(thumbnail_path,Severity_High,snip_vids[0]))
-		elif severity >= 0.3 and severity < 0.7:
-			DR.add_widget(Main.Snippet(thumbnail_path, Severity_Medium,snip_vids[0]))
-		else:
-			DR.add_widget(Main.Snippet(thumbnail_path, Severity_Low,snip_vids[0]))
+	if mainmenu.Batch_Flag == False:
+		print(sniplist)
+		Severity_High = 'Media/severity_high.png'
+		Severity_Medium = 'Media/severity_medium.png'
+		Severity_Low = 'Media/severity_low.png'
+		DR = Main.DisplayRoot()
 
-	mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
+		for snip_vids in sniplist:
+			severity = float(snip_vids[2])
+			thumbnail_path = os.path.join(TEMP_PATH,snip_vids[1])
+			print(thumbnail_path)
+			if(severity >= 0.7 ):
+				DR.add_widget(Main.Snippet(thumbnail_path,Severity_High,snip_vids[0]))
+			elif severity >= 0.3 and severity < 0.7:
+				DR.add_widget(Main.Snippet(thumbnail_path, Severity_Medium,snip_vids[0]))
+			else:
+				DR.add_widget(Main.Snippet(thumbnail_path, Severity_Low,snip_vids[0]))
 
-	SS = mainmenu.SS
-	SS.add_widget(DR)
-	mainmenu.ids.Snippets.add_widget(SS)
-	mainmenu.ids.videoplayer.state = 'play'
+		mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
+
+		SS = mainmenu.SS
+		SS.add_widget(DR)
+		mainmenu.ids.Snippets.add_widget(SS)
+		mainmenu.ids.videoplayer.state = 'play'
+	else:
+		try:
+			f = open('./Appdata/config.txt')
+			lines = f.readlines()
+			f.close()
+			video_output_path = lines[1]
+			video_output_path = video_output_path[:-1]
+			output_path = video_output_path
+		except:
+			output_path = 'Appdata/output/'
+		vidname = os.path.basename(VIDEO_PATH)
+		list_path = 'Appdata/temp/snip/'
+		Batch_SnippetList = []
+
+		for snip_vids in sniplist:
+			Batch_SnippetList.append(snip_vids[0])
+
+
+		with open('Appdata/temp/snip/snippets.txt', 'w') as file:
+			for element in Batch_SnippetList:
+				file.writelines('file ' + '\'' + element + "\'\n")
+			file.close()
+		os.system(
+			"ffmpeg -f concat -i {}snippets.txt -codec copy {}/{}_anomalous.mp4".format(list_path, output_path,
+
+																						vidname))
+		if os.path.exists('./Appdata/temp'):
+			shutil.rmtree("./Appdata/temp/")
+
+		os.makedirs('./Appdata/temp')
+		os.makedirs('./Appdata/temp/snip')
+		os.makedirs('./Appdata/temp/frames')
+		os.makedirs('./Appdata/temp/textfeatures')
+		os.makedirs('./Appdata/temp/plot')
+

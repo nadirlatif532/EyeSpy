@@ -171,12 +171,21 @@
             id: AddVideo
             size_hint: (0.03,0.04)
             pos_hint: {'x': 0.658,'y': 0.88}
-
             background_down: ''
 
             background_normal: ''
             opacity: 0
             on_press: root.filebrowse()
+
+        Button:
+            id: BatchProcessing
+            size_hint: (0.03,0.04)
+            pos_hint: {'x': 0.658,'y': 0.84}
+            background_down: ''
+
+            background_normal: ''
+            opacity: 0
+            on_press: root.batch_processing()
 
         Button:
             id: SaveSnippet
@@ -387,28 +396,13 @@
             source: 'Media/Line.png'
             size_hint: (1,1)
             pos_hint: {'x': 0,'y': 0.44}
-        Image:
-            id:rightvertSettings
-            source: 'Media/Line_vert.png'
-            size_hint: (1,0.5)
-            pos_hint: {'x': 0.275,'y': 0.435}
-        Image:
-            id:BottomSettings
-            source: 'Media/Line.png'
-            size_hint: (0.55,0.5)
-            pos_hint: {'x': 0.225,'y': 0.185}
-        Image:
-            id:leftvertSettings
-            source: 'Media/Line_vert.png'
-            size_hint: (1,0.5)
-            pos_hint: {'x': -0.275,'y': 0.435}
 
 
         Label:
             text: 'Settings'
-        FloatLayout:
-            size_hint: (0.5,0.5)
-            pos_hint: {'x': 0.1, 'y': 0.25}
+            font_name: 'Helvetica_Bold'
+            font_size: 18
+            color: rgba('#DAA520')
 
 
         Image:
@@ -424,7 +418,7 @@
             valign: 'center'
             font_size: 14
             color: rgba('#DAA520')
-            pos_hint: {'x': -0.18, 'y': 0.4}
+            pos_hint: {'x': -0.30, 'y': 0.4}
         Label:
             id: inputvideopath
             font_name: 'Helvetica_Bold'
@@ -442,16 +436,16 @@
             valign: 'center'
             font_size: 14
             color: rgba('#DAA520')
-            pos_hint: {'x': -0.17, 'y': 0.3}
+            pos_hint: {'x': -0.29, 'y': 0.3}
         Label:
             id: gpu_text
             font_name: 'Helvetica_Bold'
-            text: 'Run using GPU: '
+            text: 'Run using GPU '
             halign: 'center'
             valign: 'center'
             font_size: 14
             color: rgba('#DAA520')
-            pos_hint: {'x': -0.18, 'y': 0.15}
+            pos_hint: {'x': -0.30, 'y': 0.15}
 
         CheckBox:
             id: check
@@ -537,3 +531,4 @@
     bar_inactive_color: rgba('#DAA520')
     bar_width: 4
     do_scroll_x: False
+
