@@ -205,12 +205,14 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH, EXTRACTED_LAYER = 6,
 			severity = float(snip_vids[2])
 			thumbnail_path = os.path.join(TEMP_PATH,snip_vids[1])
 			print(thumbnail_path)
-			if(severity >= 0.7 ):
+			if severity >= 0.7 :
 				DR.add_widget(Main.Snippet(thumbnail_path,Severity_High,snip_vids[0]))
 			elif severity >= 0.3 and severity < 0.7:
 				DR.add_widget(Main.Snippet(thumbnail_path, Severity_Medium,snip_vids[0]))
-			else:
+			elif severity < 0.3:
 				DR.add_widget(Main.Snippet(thumbnail_path, Severity_Low,snip_vids[0]))
+			else:
+				pass
 
 		mainmenu = Main.App.get_running_app().root.get_screen("MainMenu")
 

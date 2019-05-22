@@ -1,4 +1,5 @@
-
+import os
+os.environ["KIVY_NO_CONSOLELOG"] = "1"
 import kivy
 from kivy.app import App
 #Configuration
@@ -8,7 +9,7 @@ Config.set('kivy','desktop','1')
 Config.set('graphics','position','custom')
 Config.set('graphics','left',700)
 Config.set('graphics','top',200)
-
+Config.set('kivy','log_enable','0')
 import feature_extractor
 from kivy.clock import Clock
 from kivy.utils import rgba,get_color_from_hex
@@ -36,7 +37,6 @@ from kivy.factory import Factory
 from kivy.uix.popup import Popup
 from kivy.utils import platform
 import string
-import os
 import anomalydetector
 from threading import Thread
 from kivy.factory import Factory
@@ -48,6 +48,7 @@ import shutil
 import sqlite3
 import torch
 from functools import partial
+
 
 
 '''
@@ -374,13 +375,15 @@ class Snippet(GridLayout):
         '''
         Desc: Change VideoPlayer Source when a snippet is clicked.
         '''
-        thumb_source = thumb_source[:-8]
-        vid_path = thumb_source + '_noext' + '.mp4'
+        try:
+            thumb_source = thumb_source[:-8]
+            vid_path = thumb_source + '_noext' + '.mp4'
 
-        mainmenu = App.get_running_app().root.get_screen("MainMenu")
-        mainmenu.ids.videoplayer.source = vid_path
-        mainmenu.ids.videoplayer.state = 'play'
-
+            mainmenu = App.get_running_app().root.get_screen("MainMenu")
+            mainmenu.ids.videoplayer.source = vid_path
+            mainmenu.ids.videoplayer.state = 'play'
+        except:
+            print('Please select correct Snippet')
     def add_snippet(self,group,value):
         '''
         Desc: toggle the Snippet in the SnippetList
