@@ -399,7 +399,8 @@
 
 
         Label:
-            text: 'Settings'
+            id: user_control
+            text: 'User Control'
             font_name: 'Helvetica_Bold'
             font_size: 18
             color: rgba('#DAA520')
@@ -492,6 +493,27 @@
             background_normal: ''
             opacity: 0
             on_press:root.filebrowse_output()
+
+        Button:
+            id: save_users
+            pos_hint: {'x': 0.7, 'y': 0.2}
+            background_color: rgba('#2f323a')
+            halign: 'center'
+            text: "Save Changes"
+            background_normal: ''
+            background_down: ''
+            color: rgba('#DAA520')
+            font_size: 20
+            size_hint: (0.2,0.1)
+            on_press: root.save_changes()
+
+
+
+
+        BoxLayout:
+            id: users
+            pos_hint: {'x':  0.25, 'y': 0}
+            size_hint: (0.4,0.4)
 <FileBrowser>:
     dirselect: True
     background_color: rgba('#c8c8c8')
@@ -520,7 +542,52 @@
         id: check
         size_hint: 0.5,1
         on_active: root.add_snippet(self.group,self.active)
+<UserEntry>:
+    canvas:
+        Color:
+            rgba: rgba('#2f323a')
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
+    cols:3
+    size_hint: 1, None
+    height: self.minimum_height
+
+    TextInput:
+        id: username
+        size_hint_y: None
+        size_hint_x: 0.1
+        cursor_color: (0,0,0,1)
+        multiline: False
+        foreground_color: rgba('#c8c8c8')
+        cursor_color: rgba('#DAA520')
+        background_color: rgba('#2f323a')
+        write_tab: False
+        font_size: 16
+
+
+        # top, bottom
+        padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
+    TextInput:
+        id: password
+        size_hint: 0.1, 0.1
+        cursor_color: (0,0,0,1)
+        multiline: False
+        foreground_color: rgba('#c8c8c8')
+        cursor_color: rgba('#DAA520')
+        background_color: rgba('#2f323a')
+        background_image: ''
+        write_tab: False
+        font_size: 16
+
+
+        # top, bottom
+        padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
+    CheckBox:
+        id: check
+        size_hint_x: 0.1
+        size_hint_y: 0.1
 
 <DisplayRoot>:
     cols: 1

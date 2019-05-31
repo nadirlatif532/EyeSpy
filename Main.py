@@ -1,5 +1,5 @@
 import os
-os.environ["KIVY_NO_CONSOLELOG"] = "1"
+#os.environ["KIVY_NO_CONSOLELOG"] = "1"
 import kivy
 from kivy.app import App
 #Configuration
@@ -9,7 +9,7 @@ Config.set('kivy','desktop','1')
 Config.set('graphics','position','custom')
 Config.set('graphics','left',700)
 Config.set('graphics','top',200)
-Config.set('kivy','log_enable','0')
+#Config.set('kivy','log_enable','0')
 import feature_extractor
 from kivy.clock import Clock
 from kivy.utils import rgba,get_color_from_hex
@@ -91,8 +91,9 @@ class LoginScreen(Screen):
         Username = self.ids.username.text
         Password = self.ids.password.text
         conn = sqlite3.connect(dbName)
-        cursor = conn.execute("""SELECT username, password from login WHERE username=(?) and password=(?)""",
+        cursor = conn.execute("""SELECT username, password, admin from login WHERE username=(?) and password=(?)""",
                               (Username, Password))
+        settings = App.get_running_app().root.get_screen("Settings")
         record_exists = False
         for r in cursor:
             record_exists = True
@@ -103,6 +104,20 @@ class LoginScreen(Screen):
                 Window.size = (1024, 768)
                 Window.left = 500
                 Window.top = 150
+                if r[2] == False:
+                    settings.ids.save_users.disabled = True
+                    settings.ids.save_users.opacity = 0
+                    settings.ids.save_users.disabled = True
+                    settings.ids.users.opacity = 0
+                    settings.ids.user_control.opacity = 0
+                elif r[2] == True:
+                    settings.ids.save_users.disabled = False
+                    settings.ids.save_users.opacity = 1
+                    settings.ids.users.disable = False
+                    settings.ids.users.opacity = 1
+                    settings.ids.user_control.opacity = 1
+                else:
+                    pass
                 Screen_Manager.current = 'MainMenu'
 
         if record_exists == False:
@@ -149,6 +164,7 @@ class MainMenu(Screen):
             settings.ids.check.disabled = True
             settings.ids.check.opacity = 0
             settings.ids.gpu_text.opacity = 0
+
 
         Window.borderless = False
         #Window.fullscreen = 'auto'
@@ -430,6 +446,8 @@ class Settings(Screen):
         super(Settings, self).__init__(**kwargs)
         self.file_popup = FilePopup()
         self.flag = 0
+        self.Display = DisplayRoot()
+        self.Scrollsettings = ScrollScreen()
 
         try:
             f = open('./Appdata/config.txt')
@@ -443,8 +461,44 @@ class Settings(Screen):
             self.ids.outputvideopath.text = video_output_path
         except:
             print("Config exception")
+    def on_pre_enter(self, *args):
 
 
+        conn = sqlite3.connect(dbName)
+        cursor = conn.execute("""SELECT username, password, admin from login""")
+        record_exists = False
+        for r in cursor:
+            self.Display.add_widget(UserEntry(r[0],r[1],r[2]))
+
+
+        self.Scrollsettings.add_widget(self.Display)
+        self.ids.users.add_widget(self.Scrollsettings)
+    def save_changes(self):
+        settings = App.get_running_app().root.get_screen("Settings")
+        if os.path.exists(dbName):
+            os.remove(dbName)
+        try:
+            conn = sqlite3.connect(dbName)
+            print("Changes saved to: {}".format(dbName))
+        except:
+            print("Connection failed with the database")
+
+        table_name = "login"
+        sql = "create table if not exists " + table_name + " (username string, password string, admin integer)"
+        conn.execute(sql)
+        conn.commit()
+
+        for child in settings.Display.children:
+            if  child.ids.username.text != '' and child.ids.password.text != '':
+                conn.execute("""insert into login (username, password,admin) VALUES (?, ?, ?);""", (child.ids.username.text, child.ids.password.text, child.ids.check.active))
+        conn.commit()
+        self.Scrollsettings.remove_widget(self.Display)
+        self.Display = DisplayRoot()
+        cursor = conn.execute("""SELECT username, password, admin from login""")
+
+        for r in cursor:
+            self.Display.add_widget(UserEntry(r[0], r[1], r[2]))
+        self.Scrollsettings.add_widget(self.Display)
     def filebrowse_input(self):
         '''
         Desc: Set input folder for videos
@@ -497,6 +551,22 @@ class Settings(Screen):
             mainmenu.Set_Gpu(True)
         else:
             mainmenu.Set_Gpu(False)
+class UserEntry(GridLayout):
+
+    def __init__(self, *args, **kwargs):
+        '''
+        Desc: Create a Snippet object from *args
+
+        '''
+        super(UserEntry, self).__init__(**kwargs)
+        self.ids.username.text = args[0]
+        self.ids.password.text = args[1]
+
+        self.ids.check.group = args[0]
+        if args[2] == 1:
+            self.ids.check.active = True
+
+
 
 class FilePopup():
     '''
@@ -635,6 +705,7 @@ class EyeSpy(App):
             conn.execute(sql)
             conn.commit()
             conn.execute("""insert into login (username, password,admin) VALUES (?, ?, ?);""", ('admin', 'admin','1'))
+            conn.execute("""insert into login (username, password,admin) VALUES (?, ?, ?);""", ('user', 'user', '0'))
             conn.commit()
 
         Window.borderless = True
