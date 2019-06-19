@@ -1,5 +1,5 @@
 import os
-#os.environ["KIVY_NO_CONSOLELOG"] = "1"
+os.environ["KIVY_NO_CONSOLELOG"] = "1"
 import kivy
 from kivy.app import App
 #Configuration
@@ -466,14 +466,14 @@ class Settings(Screen):
 
         conn = sqlite3.connect(dbName)
         cursor = conn.execute("""SELECT username, password, admin from login""")
-        record_exists = False
         for r in cursor:
             self.Display.add_widget(UserEntry(r[0],r[1],r[2]))
 
-
         self.Scrollsettings.add_widget(self.Display)
         self.ids.users.add_widget(self.Scrollsettings)
+
     def save_changes(self):
+        '''Desc: Save changes made to the user accounts by the admin '''
         settings = App.get_running_app().root.get_screen("Settings")
         if os.path.exists(dbName):
             os.remove(dbName)
@@ -555,7 +555,7 @@ class UserEntry(GridLayout):
 
     def __init__(self, *args, **kwargs):
         '''
-        Desc: Create a Snippet object from *args
+        Desc: Create a User Entry object for the admin panel from *args
 
         '''
         super(UserEntry, self).__init__(**kwargs)
