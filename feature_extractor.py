@@ -111,7 +111,7 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH, EXTRACTED_LAYER = 6,
 			clip = clip[:, 8: 112, 30: 142, :]
 			input_blobs.append(clip)
 		input_blobs = np.array(input_blobs, dtype='float32')
-		print('input_blobs_shape', input_blobs.shape)
+		print('Extracting Features..(' + str(i) + '/' + str(int(n_batch - 1)) + ')')
 		input_blobs = torch.from_numpy(np.float32(input_blobs.transpose(0, 4, 1, 2, 3)))
 		input_blobs = Variable(input_blobs).cuda() if RUN_GPU else Variable(input_blobs)
 		_, batch_output = net(input_blobs, EXTRACTED_LAYER)
