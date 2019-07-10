@@ -150,22 +150,23 @@ class MainMenu(Screen):
         self.popup = Popup(title='Please Wait',
                       content=Label(text='Video is being processed', color=rgba('#DAA520'), font_size=24),
                       auto_dismiss=False, size_hint=(0.5, 0.5))
+        self.gpu_count = 0
 
     def on_pre_enter(self):
-        '''
-        Desc: Test if a CUDA enables GPU is present. If not Disable the CPU/GPU Switch
 
-        '''
-        settings = App.get_running_app().root.get_screen("Settings")
-        if torch.cuda.device_count() > 0:
-            self.GPU_Flag = True
-            settings.ids.check.active = True
-        else:
-            settings.ids.check.disabled = True
-            settings.ids.check.opacity = 0
-            settings.ids.gpu_text.opacity = 0
+        '''Desc Test if a CUDA enables GPU is present. If not Disable the CPU/GPU Switch'''
 
+        if self.gpu_count == 0:
+            settings = App.get_running_app().root.get_screen("Settings")
+            if torch.cuda.device_count() > 0:
+                self.GPU_Flag = True
+                settings.ids.check.active = True
+            else:
+                settings.ids.check.disabled = True
+                settings.ids.check.opacity = 0
+                settings.ids.gpu_text.opacity = 0
 
+        self.gpu_count = self.gpu_count + 1
         Window.borderless = False
         #Window.fullscreen = 'auto'
         Window.position = 'custom'
@@ -461,16 +462,27 @@ class Settings(Screen):
             self.ids.outputvideopath.text = video_output_path
         except:
             print("Config exception")
-    def on_pre_enter(self, *args):
-
-
         conn = sqlite3.connect(dbName)
         cursor = conn.execute("""SELECT username, password, admin from login""")
         for r in cursor:
-            self.Display.add_widget(UserEntry(r[0],r[1],r[2]))
+            self.Display.add_widget(UserEntry(r[0], r[1], r[2]))
 
         self.Scrollsettings.add_widget(self.Display)
         self.ids.users.add_widget(self.Scrollsettings)
+
+
+        def on_pre_enter(self, *args):
+
+            self.Scrollsettings.remove_widget(self.Display)
+            self.ids.users.remove_widget(self.Scrollsettings)
+            conn = sqlite3.connect(dbName)
+            cursor = conn.execute("""SELECT username, password, admin from login""")
+            for r in cursor:
+                self.Display.add_widget(UserEntry(r[0], r[1], r[2]))
+
+            self.Scrollsettings.add_widget(self.Display)
+            self.ids.users.add_widget(self.Scrollsettings)
+
 
     def save_changes(self):
         '''Desc: Save changes made to the user accounts by the admin '''
@@ -710,6 +722,8 @@ class EyeSpy(App):
 
         Window.borderless = True
         self.icon = 'Media/eyespy_notext.png'
+
+
         return Screen_Manager
 
 
