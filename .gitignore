@@ -125,3 +125,6 @@ dmypy.json
 
 c3d.pickle
 LOGFILE.txt
+*.jpg
+*.png
+*.mp4
