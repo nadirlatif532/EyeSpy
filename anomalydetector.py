@@ -195,7 +195,7 @@ def anomalydetector(vidpath,featpath,video_name):
 
     snipdesc=[]
     sniplist=[]
-    totalscore=0
+    snipscore=[]
     while True:
         frameId = cap.get(1)
         flag, frame = cap.read()
@@ -205,7 +205,8 @@ def anomalydetector(vidpath,featpath,video_name):
 
         framescore = scoressmoothed[int(frameId)]
         if (framescore > threshold):
-            totalscore=totalscore+framescore
+
+            snipscore.append(framescore)
             cv2.imwrite('{}/{}.jpg'.format(framedir,int(frameId)),frame)
             if j==0:
                 startframe=frameId
@@ -214,19 +215,20 @@ def anomalydetector(vidpath,featpath,video_name):
 
         elif (framescore <= threshold and int(frameId)-k>64 and j!=0):
             cv2.imwrite('{}/snip{}_pic.png'.format(snipdir, snip_n), frame)
+
             os.system(
                 'ffmpeg -f image2 -framerate 30 -s {}x{} -start_number {} -i {}/%d.jpg -vcodec libx264 -profile:v high444 -refs 8 -crf 25 -preset ultrafast -pix_fmt yuv420p {}/snip{}_noext.mp4'.format(
                     width, height, startframe, framedir, snipdir, snip_n))
             snipdesc.append('snip{}_noext.mp4'.format(snip_n))
             snipdesc.append('snip{}_pic.png'.format(snip_n))
-            totalscore = totalscore/Total_frames
-            snipdesc.append(float("{0:.2f}".format(totalscore)))
+            maxscore = max(snipscore)
+            snipdesc.append(float("{}".format(maxscore)))
             snipdesc.append(int(startframe))
             snipdesc.append(k)
             sniplist.append(np.array(snipdesc))
             snipdesc.clear()
             j=0
-            totalscore=0
+            snipscore.clear()
             snip_n += 1
 
 
