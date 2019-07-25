@@ -23,6 +23,7 @@ import Main
 import anomalydetector
 from kivy.utils import rgba
 from kivy.uix.label import Label
+import GPUtil
 
 def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH, EXTRACTED_LAYER = 6,RUN_GPU = True, BATCH_SIZE = 8 ):
 	"""
@@ -35,6 +36,14 @@ def feature_extractor(OUTPUT_DIR_TEXT,VIDEO_PATH,TEMP_PATH, EXTRACTED_LAYER = 6,
 	:param BATCH_SIZE:
 	:return:
 	"""
+	GPUs = GPUtil.getGPUs()
+	Gmem = GPUs[0].memoryTotal
+	if(Gmem < 6144 and Gmem > 4096):
+		BATCH_SIZE=4
+	elif(Gmem <= 4096):
+		BATCH_SIZE=2
+	else:
+		BATCH_SIZE=BATCH_SIZE
 
 	resize_w = 112
 	resize_h = 171
